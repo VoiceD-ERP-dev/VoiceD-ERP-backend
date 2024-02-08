@@ -1,5 +1,6 @@
 const expressAsyncHandler = require('express-async-handler');
-const User = require('../models/userModel'); // Import the User model
+const User = require('../models/userModel');
+const sendEmail = require("../config/emailSender");
 
 const registerUser = expressAsyncHandler(async (req, res) => {
     const { firstName, lastName, email, contact, package, nic } = req.body;
@@ -26,6 +27,21 @@ const registerUser = expressAsyncHandler(async (req, res) => {
     });
 
     console.log(`User Created: ${user}`);
+
+
+    const subject = "Registration Successful";
+    const text = "Thank you for registering with us!";
+    const from = "dasuntheekshana12@gmail.com"; // Update with your email address
+    const to = email; // Use the registered user's email address
+
+    try {
+        await sendEmail({ from, to, subject, text });
+        console.log("Email sent successfully");
+    } catch (error) {
+        console.error("Error sending email:", error);
+        // Handle email sending error
+    }
+
     res.status(201).json({ message: "User Created Successfully", user });
 });
 
