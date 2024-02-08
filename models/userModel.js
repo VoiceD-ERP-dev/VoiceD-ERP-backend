@@ -22,7 +22,7 @@ const userSchema = new mongoose.Schema({
         require: true
     },
     nic: {
-        type: Number,
+        type: String,
         require: true
     }
 })
