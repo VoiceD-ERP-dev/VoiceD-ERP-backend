@@ -3,32 +3,29 @@ const jwt = require("jsonwebtoken");
 
 const validateToken = asyncHandler(async (req, res, next) => {
   let token;
-  let authHeader = req.headers.Authorization || req.headers.authorization;
-  if(authHeader && authHeader.startsWith("Bearer")){
-    //splitting the token in to two parts with the space and taking the second part which includes the token
+  const authHeader = req.headers.authorization;
+
+  if (authHeader && authHeader.startsWith("Bearer")) {
+    // Splitting the token into two parts with the space and taking the second part which includes the token
     token = authHeader.split(" ")[1];
-    
-    //verifying the token
+
+    // Verifying the token
     jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, decoded) => {
-        if(err){
-            res.status(401);
-            throw new Error("Admin is not autherized");
-        }
+      if (err) {
+        return res.status(401).json({ message: "Admin is not authorized" });
+      }
 
-        
-        //if the user is autherized
-        //take the info of the user and storing it in req.user
-        req.admin = decoded.admin;
-        console.log(req.admin);
-        //append in the request body
-        next();
+      
+      // If the user is authorized, take the info of the user and storing it in req.admin
+      req.user = decoded.user;
+      console.log(req.user);
+      // Append in the request body
+      next();
     });
-
-    if (!token) {
-        res.status(401);
-        throw new Error("Admin is not authorized or token is missing");
-      }   
-}
+  } else {
+    res.status(401).json({ message: "Admin is not authorized or token is missing" });
+  }
+  
 });
 
 module.exports = validateToken;
