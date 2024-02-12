@@ -1,5 +1,7 @@
 const asyncHandler = require("express-async-handler");
-const  Customer = require("../models/customerModel")
+const  Customer = require("../models/customerModel");
+const Order = require("../models/orderModel");
+
 //@desc Get all customers
 //@route GET /api/customers
 //@access private
@@ -14,32 +16,47 @@ const getCustomers = asyncHandler(async (req, res) => {    //async makes a funct
 //@routs POST /api/customers/
 //@access private
 const createCustomer = asyncHandler(async (req, res) => {
-    //printing the request body
-    console.log("The request body is : ", req.body);
-  
-    //destructuring the request body sent from the client side
-    const { name, email, phone } = req.body;
-  
-    //validating the name,email and phone and displaying the error message
-    if (!name || !email || !phone) {
-      res.status(400);
-      throw new Error("All fields are mandatory");
-    }
-    if(req.user.role == "admin" || "salesman"){
-      const customer = await Customer.create({
-        name, //equls to request.body.name. in es6 key and value is same we can use key
-        email,
-        phone,
-        user_id: req.user.id, //req.admin will come from the middleware
-  
+  const { name, email, phone, orders, invoice } = req.body;
+  // Validate customer data
+  if (!name || !email || !phone || !orders || !Array.isArray(orders)) {
+    return res.status(400).json({ message: "Name, email, phone, and orders array are required" });
+  }
+
+  // Check if user is admin or salesman
+  if (!(req.user.role === "admin" || req.user.role === "salesman")) {
+    return res.status(403).json({ message: "Not authorized" });
+  }
+
+  try {
+    // Create customer
+    const customer = await Customer.create({
+      name,
+      email,
+      phone,
+    });
+
+
+    // Create orders and associate with customer
+    const orderIds = [];
+    for (const orderData of orders) {
+      const order = await Order.create({
+        customer: customer._id,
+        description: orderData.description,
       });
-      res.status(201).json(customer);
+      orderIds.push(order._id);
     }
-    else{
-      res.status(400);
-      throw new Error("Not an authorized user");
-    }
-  });
+
+    // Update customer with order IDs
+    customer.orders = orderIds;
+    await customer.save();
+
+    res.status(201).json(customer);
+  } catch (error) {
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+module.exports = { createCustomer };
 
 //@desc Get new customers
 //@route GET /api/customers/:id
