@@ -21,9 +21,9 @@ const customerSchema = mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: "Invoice",
   },
-
 }, {
   timestamps: true
 });
 
 module.exports = mongoose.model("Customer", customerSchema);
+

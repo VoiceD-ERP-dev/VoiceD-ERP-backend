@@ -1,7 +1,7 @@
 const asyncHandler = require("express-async-handler");
 const  Customer = require("../models/customerModel");
 const Order = require("../models/orderModel");
-
+const Invoice = require("../models/invoiceModel");
 //@desc Get all customers
 //@route GET /api/customers
 //@access private
@@ -17,9 +17,10 @@ const getCustomers = asyncHandler(async (req, res) => {    //async makes a funct
 //@access private
 const createCustomer = asyncHandler(async (req, res) => {
   const { name, email, phone, orders, invoice } = req.body;
+
   // Validate customer data
-  if (!name || !email || !phone || !orders || !Array.isArray(orders)) {
-    return res.status(400).json({ message: "Name, email, phone, and orders array are required" });
+  if (!name || !email || !phone || !Array.isArray(orders) || !invoice || !invoice.description) {
+    return res.status(400).json({ message: "Invalid request format" });
   }
 
   // Check if user is admin or salesman
@@ -35,8 +36,7 @@ const createCustomer = asyncHandler(async (req, res) => {
       phone,
     });
 
-
-    // Create orders and associate with customer
+    // Create orders for the customer
     const orderIds = [];
     for (const orderData of orders) {
       const order = await Order.create({
@@ -46,8 +46,16 @@ const createCustomer = asyncHandler(async (req, res) => {
       orderIds.push(order._id);
     }
 
-    // Update customer with order IDs
+    // Create invoice for the customer
+    const invoiceObj = await Invoice.create({
+      customer: customer._id,
+      order: orderIds, // Assuming all orders are associated with this invoice
+      description: invoice.description,
+    });
+
+    // Update customer with order IDs and invoice ID
     customer.orders = orderIds;
+    customer.invoice = invoiceObj._id;
     await customer.save();
 
     res.status(201).json(customer);
@@ -55,9 +63,7 @@ const createCustomer = asyncHandler(async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 });
-
 module.exports = { createCustomer };
-
 //@desc Get new customers
 //@route GET /api/customers/:id
 //@access private
