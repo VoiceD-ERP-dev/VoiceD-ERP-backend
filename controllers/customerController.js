@@ -35,7 +35,10 @@ const createCustomer = asyncHandler(async (req, res) => {
       email,
       phone,
     });
-
+    // Handle file upload if exists
+    if (req.file) {
+      customer.img = req.file.path;
+    }
     // Create orders for the customer
     const orderIds = [];
     for (const orderData of orders) {
