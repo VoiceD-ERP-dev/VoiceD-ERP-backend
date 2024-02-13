@@ -16,10 +16,10 @@ const getCustomers = asyncHandler(async (req, res) => {    //async makes a funct
 //@routs POST /api/customers/
 //@access private
 const createCustomer = asyncHandler(async (req, res) => {
-  const { name, email, phone, orders, invoice } = req.body;
+  const { name, email, phone, invoice } = req.body;
 
   // Validate customer data
-  if (!name || !email || !phone || !Array.isArray(orders) || !invoice || !invoice.description) {
+  if (!name || !email || !phone || !invoice || !Array.isArray(invoice) || invoice.length === 0) {
     return res.status(400).json({ message: "Invalid request format" });
   }
 
@@ -35,30 +35,33 @@ const createCustomer = asyncHandler(async (req, res) => {
       email,
       phone,
     });
-    // Handle file upload if exists
-    if (req.file) {
-      customer.img = req.file.path;
-    }
-    // Create orders for the customer
+
     const orderIds = [];
-    for (const orderData of orders) {
+    const invoiceIds = [];
+
+    // Loop through each invoice and create orders and invoices for the customer
+    for (const invoiceData of invoice) {
+      // Create order
       const order = await Order.create({
         customer: customer._id,
-        description: orderData.description,
+        description: invoiceData.order.description,
+        
       });
       orderIds.push(order._id);
+
+      // Create invoice
+      const newInvoice = await Invoice.create({
+        customer: customer._id,
+        order: order._id,
+        description: invoiceData.description,
+      });
+      order.invoice = newInvoice._id;
+      await order.save();
     }
 
-    // Create invoice for the customer
-    const invoiceObj = await Invoice.create({
-      customer: customer._id,
-      order: orderIds, // Assuming all orders are associated with this invoice
-      description: invoice.description,
-    });
-
-    // Update customer with order IDs and invoice ID
+    // Update customer with order IDs
     customer.orders = orderIds;
-    customer.invoice = invoiceObj._id;
+    customer.invoice = invoiceIds;
     await customer.save();
 
     res.status(201).json(customer);
@@ -66,7 +69,9 @@ const createCustomer = asyncHandler(async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 });
+
 module.exports = { createCustomer };
+
 //@desc Get new customers
 //@route GET /api/customers/:id
 //@access private
