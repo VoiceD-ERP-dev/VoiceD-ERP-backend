@@ -72,7 +72,7 @@ const loginAdmin = asyncHandler(async(req,res) =>{
       {
         //payload
         user: {
-          username: admin.username,
+          name: admin.username,
           role: "admin",
           email: admin.email,
           id: admin.id,

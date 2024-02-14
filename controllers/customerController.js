@@ -17,11 +17,11 @@ const getCustomers = asyncHandler(async (req, res) => {    //async makes a funct
 //@routs POST /api/customers/
 //@access private
 const createCustomer = asyncHandler(async (req, res) => {
-  const { name, email, phone, invoice } = req.body;
+  const { firstname,lastname,nicNo,brId, email, phone,address, salesman,salesmanID, invoice } = req.body;
 
   // Validate customer data
-  if (!name || !email || !phone || !invoice || !Array.isArray(invoice) || invoice.length === 0) {
-    return res.status(400).json({ message: "Invalid request format" });
+   if (!firstname || !lastname || !nicNo || !brId || !email || !phone || !address || !invoice || !Array.isArray(invoice) || invoice.length === 0) {
+     return res.status(400).json({ message: "Invalid request format" });
   }
 
   // Check if user is admin or salesman
@@ -32,11 +32,18 @@ const createCustomer = asyncHandler(async (req, res) => {
   try {
     // Create customer
     const customer = await Customer.create({
-      name,
+      firstname,
+      lastname,
+      nicNo,
+      brId,
       email,
       phone,
+      address,
+      salesman : req.user.name,
+      salesmanID: req.user.id,
+      // Add other fields as needed
     });
-    
+  
     if (req.files) {
       const nicImgFiles = req.files['nicImg'];
       const brDocFiles = req.files['brDoc'];
