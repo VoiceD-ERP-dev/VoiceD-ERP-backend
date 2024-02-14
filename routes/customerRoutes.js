@@ -1,5 +1,7 @@
 const express = require("express");
 const router = express.Router();
+const upload = require("../middleware/upload");
+
 const {  
     getCustomers,
     createCustomer,
@@ -12,7 +14,7 @@ const validateToken = require("../middleware/validateTokenHandler");
 //once you made all the customer routes private it should be validated
 //using the validateToken middle weare to validate the route
 router.use(validateToken);   //this will walidate all the rutes
-router.route("/").get(getCustomers).post(createCustomer);
+router.route("/cv").get(getCustomers).post(upload.single('img'), createCustomer);
 router.route("/:id").get(getCustomer).put(updateCustomer).delete(deleteCustomer);
 
 

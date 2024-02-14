@@ -4,6 +4,7 @@ const Order = require("../models/orderModel");
 const Invoice = require("../models/invoiceModel");
 const sendMail = require("../config/emailSender");
 const sendPdfEmail = require('../config/pdfGenerator');
+const Package = require("../models/packageModel")
 
 //@desc Get all customers
 //@route GET /api/customers
@@ -17,11 +18,11 @@ const getCustomers = asyncHandler(async (req, res) => {
 //@routs POST /api/customers/
 //@access private
 const createCustomer = asyncHandler(async (req, res) => {
-  const { name, email, phone, orders, invoice } = req.body;
+  const { name, email, phone, invoice } = req.body;
 
 
   // Validate customer data
-  if (!name || !email || !phone || !Array.isArray(orders) || !invoice || !invoice.description) {
+  if (!name || !email || !phone || !invoice || !Array.isArray(invoice) || invoice.length === 0) {
     return res.status(400).json({ message: "Invalid request format" });
   }
 
@@ -37,27 +38,48 @@ const createCustomer = asyncHandler(async (req, res) => {
       email,
       phone,
     });
-
-    // Create orders for the customer
-    const orderIds = [];
-    for (const orderData of orders) {
-      const order = await Order.create({
-        customer: customer._id,
-        description: orderData.description,
-      });
-      orderIds.push(order._id);
+    
+    if (req.file) {
+      customer.img = req.file.path;
     }
 
-    // Create invoice for the customer
-    const invoiceObj = await Invoice.create({
-      customer: customer._id,
-      order: orderIds,
-      description: invoice.description,
-    });
+    const orderIds = [];
+    const invoiceIds = [];
 
-    // Update customer with order IDs and invoice ID
+    // Loop through each invoice and create orders and invoices for the customer
+    for (const invoiceData of invoice) {
+      // Create order
+      const order = await Order.create({
+        customer: customer._id,
+        description: invoiceData.order.description,
+        
+      });
+      orderIds.push(order._id);
+
+
+      // Create invoice
+      const newInvoice = await Invoice.create({
+        customer: customer._id,
+        order: order._id,
+        description: invoiceData.description,
+      });
+      invoiceIds.push(newInvoice._id);
+
+
+      const newPackage = await Package.create({
+        description: invoiceData.package.description,
+        invoice: newInvoice._id,
+      });
+      order.invoice = newInvoice._id;
+      await order.save();
+
+      newInvoice.package = newPackage._id;
+      await newInvoice.save();
+    }
+
+    // Update customer with order IDs
     customer.orders = orderIds;
-    customer.invoice = invoiceObj._id;
+    customer.invoice = invoiceIds;
     await customer.save();
 
     const pdfSent = await sendPdfEmail(name,email,phone);
@@ -71,6 +93,7 @@ const createCustomer = asyncHandler(async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 });
+
 
 //@desc Get new customers
 //@route GET /api/customers/:id
@@ -124,6 +147,7 @@ const deleteCustomer = asyncHandler(async (req, res) => {
   await Customer.deleteOne({ _id: req.params.id });
   res.status(200).json(customer);
 });
+
 
 module.exports = {
   getCustomers,
