@@ -84,7 +84,8 @@ const createCustomer = asyncHandler(async (req, res) => {
       invoiceIds.push(newInvoice._id);
 
       const newPackage = await Package.create({
-        description: invoiceData.package.description,
+        package: invoiceData.package.package,
+        startupFee: invoiceData.package.startupFee,
         invoice: newInvoice._id,
       });
       order.invoice = newInvoice._id;
@@ -101,6 +102,7 @@ const createCustomer = asyncHandler(async (req, res) => {
 
     res.status(201).json(customer);
   } catch (error) {
+    console.error("Error creating package:", error);
     res.status(500).json({ message: "Server error" });
   }
 });

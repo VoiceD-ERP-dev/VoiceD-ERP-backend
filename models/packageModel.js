@@ -6,7 +6,11 @@ const packageSchema = mongoose.Schema({
     required: true,
     ref: "Invoice",
   },
-  description: {
+  package: {
+    type: String,
+    required: true,
+  },
+  startupFee: {
     type: String,
     required: true,
   },
