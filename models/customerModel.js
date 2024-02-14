@@ -13,14 +13,15 @@ const customerSchema = mongoose.Schema({
     type: String,
     required: [true, "Please add the customer number"],
   },
+  invoice: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Invoice",
+  }],
   orders: [{
     type: mongoose.Schema.Types.ObjectId,
     ref: "Order",
   }],
-  invoice: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "Invoice",
-  },
+  img: String,
 }, {
   timestamps: true
 });

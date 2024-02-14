@@ -6,10 +6,14 @@ const invoiceSchema = mongoose.Schema({
     required: true,
     ref: "Customer",
   },
-  order: [{
+  order: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Order",
-  }],
+  },
+  package: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Package",
+  },
   description: {
     type: String,
     required: true,
