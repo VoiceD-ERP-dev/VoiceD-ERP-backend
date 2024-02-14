@@ -10,6 +10,10 @@ const invoiceSchema = mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: "Order",
   },
+  package: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Package",
+  },
   description: {
     type: String,
     required: true,

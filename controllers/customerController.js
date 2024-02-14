@@ -2,6 +2,7 @@ const asyncHandler = require("express-async-handler");
 const  Customer = require("../models/customerModel");
 const Order = require("../models/orderModel");
 const Invoice = require("../models/invoiceModel");
+const Package = require("../models/packageModel")
 //@desc Get all customers
 //@route GET /api/customers
 //@access private
@@ -35,6 +36,10 @@ const createCustomer = asyncHandler(async (req, res) => {
       email,
       phone,
     });
+    
+    if (req.file) {
+      customer.img = req.file.path;
+    }
 
     const orderIds = [];
     const invoiceIds = [];
@@ -55,8 +60,17 @@ const createCustomer = asyncHandler(async (req, res) => {
         order: order._id,
         description: invoiceData.description,
       });
+      invoiceIds.push(newInvoice._id);
+
+      const newPackage = await Package.create({
+        description: invoiceData.package.description,
+        invoice: newInvoice._id,
+      });
       order.invoice = newInvoice._id;
       await order.save();
+
+      newInvoice.package = newPackage._id;
+      await newInvoice.save();
     }
 
     // Update customer with order IDs
@@ -128,6 +142,7 @@ const deleteCustomer = asyncHandler(async (req, res) => {
     await Customer.deleteOne({ _id: req.params.id });
     res.status(200).json(customer); 
   });
+
 
 module.exports = {
     getCustomers,
