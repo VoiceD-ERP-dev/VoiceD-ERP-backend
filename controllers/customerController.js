@@ -37,8 +37,22 @@ const createCustomer = asyncHandler(async (req, res) => {
       phone,
     });
     
-    if (req.file) {
-      customer.img = req.file.path;
+    if (req.files) {
+      const nicImgFiles = req.files['nicImg'];
+      const brDocFiles = req.files['brDoc'];
+      const otherDocFiles = req.files['otherDoc'];
+
+      if (nicImgFiles) {
+        nicImgFiles.forEach(file => customer.nicImg.push(file.path));
+      }
+
+      if (brDocFiles) {
+        brDocFiles.forEach(file => customer.brDoc.push(file.path));
+      }
+
+      if (otherDocFiles) {
+        otherDocFiles.forEach(file => customer.otherDoc.push(file.path));
+      }
     }
 
     const orderIds = [];

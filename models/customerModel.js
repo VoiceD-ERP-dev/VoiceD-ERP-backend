@@ -21,7 +21,9 @@ const customerSchema = mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: "Order",
   }],
-  img: String,
+  otherDoc: [String],
+  brDoc: [String],
+  nicImg: [String],
 }, {
   timestamps: true
 });
