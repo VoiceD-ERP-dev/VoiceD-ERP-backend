@@ -2,7 +2,9 @@ const asyncHandler = require("express-async-handler");
 const  Customer = require("../models/customerModel");
 const Order = require("../models/orderModel");
 const Invoice = require("../models/invoiceModel");
-const Package = require("../models/packageModel")
+const Package = require("../models/packageModel");
+const sendMail = require("../config/emailSender");
+const sendPdfEmail = require('../config/pdfGenerator');
 //@desc Get all customers
 //@route GET /api/customers
 //@access private
@@ -17,7 +19,7 @@ const getCustomers = asyncHandler(async (req, res) => {    //async makes a funct
 //@routs POST /api/customers/
 //@access private
 const createCustomer = asyncHandler(async (req, res) => {
-  const { firstname,lastname,nicNo,brId, email, phone,address, salesman,salesmanID, invoice } = req.body;
+  const { firstname,lastname,nicNo,brId, email, phone,address,invoice } = req.body;
 
   // Validate customer data
    if (!firstname || !lastname || !nicNo || !brId || !email || !phone || !address || !invoice || !Array.isArray(invoice) || invoice.length === 0) {
@@ -28,7 +30,7 @@ const createCustomer = asyncHandler(async (req, res) => {
   if (!(req.user.role === "admin" || req.user.role === "salesman")) {
     return res.status(403).json({ message: "Not authorized" });
   }
-
+  let pdfSent = false;
   try {
     // Create customer
     const customer = await Customer.create({
@@ -88,17 +90,82 @@ const createCustomer = asyncHandler(async (req, res) => {
         startupFee: invoiceData.package.startupFee,
         invoice: newInvoice._id,
       });
+      let startupFee = invoiceData.package.startupFee;
+      let package= invoiceData.package.package;
+      let packagePrice = "";
+      if (invoiceData.package.package === "Basic") {
+        packagePrice = 3000;
+      } else if (invoiceData.package.package === "Platinum") {
+        packagePrice = 7000;
+      } else {
+        packagePrice = 12000;
+      }
+
+
       order.invoice = newInvoice._id;
       await order.save();
 
+      //---------------------------------------------------------------------------------
+      const today = new Date();
+
+      // Get the current year, month, and day
+      let year = today.getFullYear();
+      let month = today.getMonth() + 1; // Note: January is 0
+      let day = today.getDate();
+      
+      // Add one month to the current month
+      month += 1;
+      
+      // Check if the month exceeds 12 (December), adjust year and month accordingly
+      if (month > 12) {
+        month = 1; // Reset month to January
+        year += 1; // Increment year
+      }
+      
+      // Ensure month and day are two digits
+      month = month < 10 ? '0' + month : month;
+      day = day < 10 ? '0' + day : day;
+      
+      // Set currentDate in the specified format (yyyy/mm/dd)
+      const currentDate = `${year}/${month}/${day}`;
+      
+      // Get the last day of the next month
+      let nextMonth = month + 1;
+      let nextYear = year;
+      if (nextMonth > 12) {
+        nextMonth = 1; // Reset month to January
+        nextYear += 1; // Increment year
+      }
+      
+      // Get the last day of the next month
+      const lastDayOfMonth = new Date(nextYear, nextMonth, 0).getDate();
+      
+      // Set duedate to the last day of the next month
+      const duedate = `${nextYear}/${nextMonth}/${lastDayOfMonth}`;
+      
+      console.log("Current Date:", currentDate);
+      console.log("Due Date:", duedate);
+      
+      
+      //--------------------------------------------------------------------------------
+
+      let orderId = order._id;
+      let invoiceId = newInvoice._id;
       newInvoice.package = newPackage._id;
       await newInvoice.save();
+      const pdfSent = await sendPdfEmail(firstname, lastname,email, phone,invoiceId,orderId,currentDate,duedate,package,packagePrice,startupFee);
+      if(!pdfSent){
+        throw new Error("Failed to send PDF via email!!")
+      }
     }
 
     // Update customer with order IDs
     customer.orders = orderIds;
     customer.invoice = invoiceIds;
     await customer.save();
+
+
+    
 
     res.status(201).json(customer);
   } catch (error) {
