@@ -11,7 +11,7 @@ const sendPdfEmail = require('../config/pdfGenerator');
 const getCustomers = asyncHandler(async (req, res) => {    //async makes a function return a Promise
   //getting the customers from the db
   //getting all the customers created by the login in admin
-  const customers = await Customer.find({ user_id: req.admin.id });  //await makes a function wait for a Promise
+  const customers = await Customer.find({ user_id: req.user.id });  //await makes a function wait for a Promise
     res.status(200).json(customers);
   });
 
@@ -95,6 +95,7 @@ const createCustomer = asyncHandler(async (req, res) => {
       let packagePrice = "";
       if (invoiceData.package.package === "Basic") {
         packagePrice = 3000;
+    
       } else if (invoiceData.package.package === "Platinum") {
         packagePrice = 7000;
       } else {
@@ -153,7 +154,7 @@ const createCustomer = asyncHandler(async (req, res) => {
       let invoiceId = newInvoice._id;
       newInvoice.package = newPackage._id;
       await newInvoice.save();
-      const pdfSent = await sendPdfEmail(firstname, lastname,email, phone,invoiceId,orderId,currentDate,duedate,package,packagePrice,startupFee);
+      const pdfSent = await sendPdfEmail(firstname, lastname,email,nicNo,address, phone,invoiceId,orderId,currentDate,duedate,package,packagePrice,startupFee);
       if(!pdfSent){
         throw new Error("Failed to send PDF via email!!")
       }

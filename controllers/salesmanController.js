@@ -27,7 +27,6 @@ const createsalesman = asyncHandler(async (req, res) => {
   }
   });
 
-
 //@desc Login a user
 //@routs POST /api/salesmen/login
 //@access public
@@ -39,6 +38,7 @@ const loginsalesman = asyncHandler(async(req, res) => {
         throw new Error("All fields are mandatory!");
     }
 
+    
     //taking the email from the req body and finding it from the db
     const salesman = await Salesman.findOne({ email });
     console.log(salesman);

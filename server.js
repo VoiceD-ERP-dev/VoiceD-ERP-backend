@@ -1,4 +1,5 @@
 const express = require("express");
+const cors = require("cors");
 const connectiondb = require("./config/dbConnection");
 const dotenv = require("dotenv");
 const errorHandler = require("./middleware/errorHandler");
@@ -12,6 +13,8 @@ const app = express();
 const port = process.env.PORT || 5000;
 
 app.use(express.json());
+app.use(cors({ origin: "http://localhost:5174" }));
+app.options("*", cors());
 app.use("/api/admins", require("./routes/adminRoutes"));
 app.use("/api/customers", require("./routes/customerRoutes"));
 app.use("/api/salesmen", salesmanRoutes);
