@@ -14,7 +14,7 @@ const invoiceSchema = mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: "Package",
   },
-  description: {
+  paymentType: {
     type: String,
     required: true,
   },

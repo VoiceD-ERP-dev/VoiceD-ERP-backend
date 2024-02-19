@@ -1,10 +1,10 @@
 const mongoose = require("mongoose");
 
 const salesmanSchema = mongoose.Schema({
-    user_id: {
+    admin_id: {
         type: mongoose.Schema.Types.ObjectId,
         required: true,
-        ref: "User",
+        ref: "Admin",
       },
     name: {
         type: String,
@@ -17,6 +17,10 @@ const salesmanSchema = mongoose.Schema({
     password: {
         type: String,
         required: [true, "Please add the password"],
+    },
+    userId:{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "userId",
     },
 },{
     timestamps: true

@@ -1,9 +1,21 @@
 const mongoose = require("mongoose");
 
 const customerSchema = mongoose.Schema({
-  name: {
+  firstname: {
     type: String,
-    required: [true, "Please add the customer name"],
+    required: [true, "Please add the customer firstname"],
+  },
+  lastname: {
+    type: String,
+    required: [true, "Please add the customer lastname"],
+  },
+  nicNo: {
+    type: String,
+    required: [true, "Please add the customer NIC"],
+  },
+  brId: {
+    type: String,
+    required: [true, "Please add the customer BR ID"],
   },
   email: {
     type: String,
@@ -13,6 +25,16 @@ const customerSchema = mongoose.Schema({
     type: String,
     required: [true, "Please add the customer number"],
   },
+  address: {
+    type: String,
+    required: [true, "Please add the customer address"],
+  },
+  salesman: {
+    type: String,
+  },
+  salesmanID: {
+    type: String,
+  },
   invoice: [{
     type: mongoose.Schema.Types.ObjectId,
     ref: "Invoice",
@@ -21,7 +43,13 @@ const customerSchema = mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: "Order",
   }],
-  img: String,
+  orders: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Order",
+  }],
+  otherDoc: [String],
+  brDoc: [String],
+  nicImg: [String],
 }, {
   timestamps: true
 });
