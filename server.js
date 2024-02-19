@@ -6,6 +6,7 @@ const errorHandler = require("./middleware/errorHandler");
 const salesmanRoutes = require("./routes/salesmanRoutes");
 const orderRoutes = require("./routes/orderRoutes");
 const invoiceRoutes = require("./routes/invoiceRoutes");
+const userRoutes = require("./routes/userRoutes");
 dotenv.config();
 connectiondb();
 
@@ -20,6 +21,8 @@ app.use("/api/customers", require("./routes/customerRoutes"));
 app.use("/api/salesmen", salesmanRoutes);
 app.use("/api/orders", orderRoutes);
 app.use("/api/invoices", invoiceRoutes);
+app.use("/api/users", userRoutes);
+
 app.use(errorHandler);
 
 app.listen(port, () => {

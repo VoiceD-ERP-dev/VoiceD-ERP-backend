@@ -1,9 +1,9 @@
 const mongoose = require("mongoose");
 
-const adminSchema = mongoose.Schema({
+const userSchema = mongoose.Schema({
     username : {
         type : String,
-        required: [true, "Please add the admin name"]
+        required: [true, "Please add the Username"]
     },
     email :{
         type : String, 
@@ -14,17 +14,17 @@ const adminSchema = mongoose.Schema({
         type: String,
         required : [true, "please add the admin password"],
     },
-    adminRole:{
+    role: {
         type: String,
-        required : [true, "please add the admin Role"],
+        required : [true, "please add the Role"],
     },
-    userId:{
+    registerId:{
       type: mongoose.Schema.Types.ObjectId,
-      ref: "userId",
+      ref: "registerId",
     },
 }, 
 {
     timestamps: true
 });
 
-module.exports = mongoose.model("Admin" , adminSchema);
+module.exports = mongoose.model("User" , userSchema);

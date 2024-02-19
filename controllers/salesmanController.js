@@ -1,5 +1,6 @@
 const asyncHandler = require("express-async-handler");
 const Salesman = require("../models/salesmanModel");
+const User = require("../models/userModel");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 
@@ -16,9 +17,18 @@ const createsalesman = asyncHandler(async (req, res) => {
       name,
       email,
       password: hashedPassword,
-      user_id: req.user.id,
+      admin_id: req.user.id,
     });
-    
+    const user = await User.create({
+      username: name,
+      email,
+      password : hashedPassword,
+      role: "salesman",
+      registerId: salesman._id
+    });
+    salesman.userId=user._id
+    await salesman.save();
+
     res.status(201).json(salesman);
   }
   else{
@@ -26,6 +36,7 @@ const createsalesman = asyncHandler(async (req, res) => {
     throw new Error("Not an authorized user");
   }
   });
+
 
 //@desc Login a user
 //@routs POST /api/salesmen/login

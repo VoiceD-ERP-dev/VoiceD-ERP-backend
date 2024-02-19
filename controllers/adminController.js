@@ -1,5 +1,6 @@
-const asyncHandler = require("express-async-handler")
+const asyncHandler = require("express-async-handler");
 const Admin = require("../models/adminModel");
+const User = require("../models/userModel");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 
@@ -8,10 +9,10 @@ const bcrypt = require("bcrypt");
 //@access public
 const registerAdmin = asyncHandler(async(req,res) =>{
   //destructuring the request body sent from the client side
-  const { username, email, password } = req.body;
+  const { username, email, password, adminRole } = req.body;
   
     //checking weather the fileds are empty
-    if( !username || !email || !password){
+    if( !username || !email || !password || !adminRole){
         res.status(400);
         throw new Error("All fields are mandatory!");
     }
@@ -33,10 +34,21 @@ const registerAdmin = asyncHandler(async(req,res) =>{
     const admin = await Admin.create({
         username,
         email,
-        password : hashedPassword
+        password : hashedPassword,
+        adminRole
     });
+    const user = await User.create({
+      username,
+      email,
+      password : hashedPassword,
+      role: "admin",
+      registerId: admin._id
+    });
+    admin.userId=user._id
+    await admin.save();
 
     console.log(`Admin created ${admin}`);
+    console.log(`Admin created ${user}`);
 
     //if admin is successfully created send the info to the admin
     if(admin){
