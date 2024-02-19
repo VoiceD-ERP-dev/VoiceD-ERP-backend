@@ -148,6 +148,7 @@ const createCustomer = asyncHandler(async (req, res) => {
       console.log("Due Date:", duedate);
       
       
+      
       //--------------------------------------------------------------------------------
 
       let orderId = order._id;
@@ -159,6 +160,7 @@ const createCustomer = asyncHandler(async (req, res) => {
         throw new Error("Failed to send PDF via email!!")
       }
     }
+
 
     // Update customer with order IDs
     customer.orders = orderIds;
