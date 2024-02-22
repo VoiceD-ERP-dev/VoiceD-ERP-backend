@@ -5,6 +5,7 @@ const Invoice = require("../models/invoiceModel");
 const Package = require("../models/packageModel");
 const sendMail = require("../config/emailSender");
 const sendPdfEmail = require('../config/pdfGenerator');
+
 //@desc Get all customers
 //@route GET /api/customers
 //@access private
@@ -151,8 +152,8 @@ const createCustomer = asyncHandler(async (req, res) => {
       
       //--------------------------------------------------------------------------------
 
-      let orderId = order._id;
-      let invoiceId = newInvoice._id;
+      let orderId = order.orderNo;
+      let invoiceId = newInvoice.invoiceNo;
       newInvoice.package = newPackage._id;
       await newInvoice.save();
       const pdfSent = await sendPdfEmail(firstname, lastname,email,nicNo,address, phone,invoiceId,orderId,currentDate,duedate,package,packagePrice,startupFee);

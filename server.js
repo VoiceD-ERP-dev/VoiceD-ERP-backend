@@ -14,7 +14,7 @@ const app = express();
 const port = process.env.PORT || 5000;
 
 app.use(express.json());
-app.use(cors({ origin: "http://localhost:5174" }));
+app.use(cors({ origin: "http://localhost:5173" }));
 app.options("*", cors());
 app.use("/api/admins", require("./routes/adminRoutes"));
 app.use("/api/customers", require("./routes/customerRoutes"));
