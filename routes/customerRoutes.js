@@ -15,7 +15,7 @@ const validateToken = require("../middleware/validateTokenHandler");
 //using the validateToken middle weare to validate the route
 router.use(validateToken);   //this will walidate all the rutes
 router.route("/cv").get(getCustomers).post(upload.fields([
-    { name: 'nicImg', maxCount: 10 },
+    { name: 'nicDoc', maxCount: 10 },
     { name: 'brDoc', maxCount: 10 },
     { name: 'otherDoc', maxCount: 10 }
 ]), createCustomer);

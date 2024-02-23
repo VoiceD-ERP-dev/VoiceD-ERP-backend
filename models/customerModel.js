@@ -49,7 +49,7 @@ const customerSchema = mongoose.Schema({
   }],
   otherDoc: [String],
   brDoc: [String],
-  nicImg: [String],
+  nicDoc: [String],
 }, {
   timestamps: true
 });

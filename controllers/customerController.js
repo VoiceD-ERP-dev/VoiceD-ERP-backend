@@ -48,12 +48,12 @@ const createCustomer = asyncHandler(async (req, res) => {
     });
   
     if (req.files) {
-      const nicImgFiles = req.files['nicImg'];
+      const nicDocFiles = req.files['nicDoc'];
       const brDocFiles = req.files['brDoc'];
       const otherDocFiles = req.files['otherDoc'];
 
-      if (nicImgFiles) {
-        nicImgFiles.forEach(file => customer.nicImg.push(file.path));
+      if (nicDocFiles) {
+        nicDocFiles.forEach(file => customer.nicDoc.push(file.path));
       }
 
       if (brDocFiles) {
