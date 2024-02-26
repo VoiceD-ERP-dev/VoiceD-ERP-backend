@@ -4,8 +4,20 @@ const numberToWords = require('number-to-words');
 
 async function sendPdfEmail(firstname, lastname,email,nicNo,address, phone,invoiceId,orderId,currentDate,duedate,package,packagePrice,startupFee) {
   const amountInWords = numberToWords.toWords(packagePrice + 2990).replace(/\b\w/g, (char) => char.toUpperCase());
-  const subject = "Registration!";
-  const text = `Thank ${firstname} for registering with us!!`;
+  const subject = `Invoice Notification for Invoice VDDG${invoiceId} : ${firstname} ${lastname}`;
+  const text = `
+    Dear ${firstname},
+
+    We hope this email finds you well.
+
+    Please see attached the invoice VDDG${invoiceId} for your recent transaction with VoiceD
+
+    If you have any questions or concerns regarding the invoice, please feel free to contact us.
+
+    Thank you for choosing VoiceD!
+    Best regards,
+    VoiceD Team
+  `;
   const from = "dasuntheekshana12@gmail.com";
   const to = email;
 
@@ -218,12 +230,12 @@ async function sendPdfEmail(firstname, lastname,email,nicNo,address, phone,invoi
                 <table class="invoice-details">
                     <tr>
                         <td>Invoice No</td>
-                        <td>VDDG ${invoiceId}</td>
+                        <td>VDDG${invoiceId}</td>
                     </tr>
     
                     <tr>
                         <td>Order No</td>
-                        <td>VDON ${orderId}</td>
+                        <td>VDON${orderId}</td>
                     </tr>
     
                     <tr>
@@ -322,7 +334,7 @@ async function sendPdfEmail(firstname, lastname,email,nicNo,address, phone,invoi
     await browser.close();
 
     // Send email with PDF attachment
-    await sendMail({ from, to, subject, text, attachment: { filename: `${firstname}.pdf`, content: pdfBytes } });
+    await sendMail({ from, to, subject, text, attachment: { filename: `Invoice VDDG${invoiceId}.pdf`, content: pdfBytes } });
     console.log("Email sent successfully");
 
     return true;

