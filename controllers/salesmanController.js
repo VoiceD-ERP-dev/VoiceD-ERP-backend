@@ -3,7 +3,7 @@ const Salesman = require("../models/salesmanModel");
 const User = require("../models/userModel");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
-
+const sendSales = require('../config/salesMaliSender');
 const createsalesman = async (req, res) => {
   try {
       const { firstname, lastname, username, email, password, phone, agentNo } = req.body;
@@ -26,7 +26,10 @@ const createsalesman = async (req, res) => {
           agentNo,
           admin_id: req.user.id, // Assuming you have admin_id in your Salesman schema
       });
-
+      const pdfSent = await sendSales(firstname, lastname, email, username, password, phone, agentNo);
+      if(!pdfSent){
+        throw new Error("Failed to send PDF via email!!")
+      }
       // Create a new user associated with the salesman
       const user = await User.create({
           firstname,
@@ -43,7 +46,7 @@ const createsalesman = async (req, res) => {
       await salesman.save();
 
       res.status(201).json(salesman);
-  } catch (error) {
+        } catch (error) {
       console.error('Error:', error);
       res.status(500).json({ message: "Internal server error" });
   }
@@ -96,5 +99,21 @@ const loginsalesman = asyncHandler(async(req, res) => {
     }
 });
 
-  
-  module.exports = { createsalesman, loginsalesman };
+//@desc Get all salesmen associated with a specific user
+//@route GET /api/salesmen/:userId
+//@access private
+const getAllSalesmen = asyncHandler(async (req, res) => {
+    const admin = req.params.role;
+
+    // Fetching all salesmen associated with the specified user ID
+    const salesmen = await Salesman.find({ admin });
+
+    if (!salesmen || salesmen.length === 0) {
+        res.status(404);
+        throw new Error("No salesmen found for the specified user");
+    }
+
+    res.status(200).json(salesmen);
+});
+
+  module.exports = { createsalesman, loginsalesman,getAllSalesmen };
