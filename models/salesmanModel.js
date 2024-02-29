@@ -17,27 +17,28 @@ const salesmanSchema = mongoose.Schema({
     username : {
         type : String,
         required: [true, "Please add the admin username"],
-        unique : [true, "Email address is already exsit"]
+        //unique : [true, "Username is already taken"]
     },
     email :{
         type : String, 
-        required : [true, "Please add a email"],
-        unique : [true, "Email address is already exsit"]
+        required : [true, "Please add an email"],
+        //unique : [true, "Email address is already taken"]
     },
+    
     password: {
         type: String,
-        required : [true, "please add the admin password"],
+        required : [true, "Please add the admin password"],
     },
     phone: {
         type: String,
         required: [true, "Please add the admin phone number"],
     },
+
     agentNo : {
         type : String,
         required: [true, "Please add the admin agentNo"],
-        unique : [true, "This agentNo is already exsit"]
+        //unique : [true, "Agent number is already taken"]
     },
-    
     userId:{
         type: mongoose.Schema.Types.ObjectId,
         ref: "userId",
