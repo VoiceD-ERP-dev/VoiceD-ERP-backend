@@ -9,16 +9,16 @@ const bcrypt = require("bcrypt");
 //@access public
 const registerAdmin = asyncHandler(async(req,res) =>{
   //destructuring the request body sent from the client side
-  const { username, email, password, adminRole } = req.body;
+  const { firstname,lastname,username, email, password,phone,epfRegNo,agentNo, adminRole } = req.body;
   
     //checking weather the fileds are empty
-    if( !username || !email || !password || !adminRole){
+    if(!username || !email || !password || !adminRole || !firstname || !lastname || !phone || !epfRegNo || !agentNo){
         res.status(400);
         throw new Error("All fields are mandatory!");
     }
 
     //checking weather the email is already exist
-    const userAvailable = await Admin.findOne( {email} );
+    const userAvailable = await Admin.findOne( {username} );
     if(userAvailable){
         res.status(400);
         throw new Error("Admin alerady registered");
@@ -32,18 +32,26 @@ const registerAdmin = asyncHandler(async(req,res) =>{
 
     //create a new admin
     const admin = await Admin.create({
-        username,
-        email,
-        password : hashedPassword,
-        adminRole
+      firstname,
+      lastname,
+      username,
+      email,
+      password : hashedPassword,
+      phone,
+      epfRegNo,
+      agentNo,
+      adminRole
     });
     const user = await User.create({
+      firstname,
+      lastname,
       username,
       email,
       password : hashedPassword,
       role: "admin",
       registerId: admin._id
     });
+
     admin.userId=user._id
     await admin.save();
 
@@ -54,7 +62,7 @@ const registerAdmin = asyncHandler(async(req,res) =>{
     if(admin){
         res.status(201).json({ 
             _id : admin.id,
-            email:admin.email
+            username:admin.username
         });
         }else{
         res.status(400);
@@ -68,14 +76,14 @@ const registerAdmin = asyncHandler(async(req,res) =>{
 //@access public
 const loginAdmin = asyncHandler(async(req,res) =>{
       //fetching the email and password from the body
-  const { email, password } = req.body;
-  if (!email || !password) {
+  const { username, password } = req.body;
+  if (!username || !password) {
     res.status(400);
     throw new Error("All fields are mandatory!");
   }
 
   //taking the emain from the req body and finding it from the db
-  const admin = await Admin.findOne({ email });
+  const admin = await Admin.findOne({ username });
   console.log(admin);
 
   //comparing the entered pw with hashedpassword
@@ -84,7 +92,9 @@ const loginAdmin = asyncHandler(async(req,res) =>{
       {
         //payload
         user: {
-          name: admin.username,
+          firstname: admin.firstname,
+          lastname: admin.lastname,
+          username: admin.username,
           role: "admin",
           email: admin.email,
           id: admin.id,

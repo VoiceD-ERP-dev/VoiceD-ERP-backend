@@ -1,9 +1,18 @@
 const mongoose = require("mongoose");
 
 const adminSchema = mongoose.Schema({
+    firstname: {
+        type: String,
+        required: [true, "Please add the admin firstname"],
+    },
+    lastname: {
+        type: String,
+        required: [true, "Please add the admin lastname"],
+    },
     username : {
         type : String,
-        required: [true, "Please add the admin name"]
+        required: [true, "Please add the admin username"],
+        unique : [true, "Email address is already exsit"]
     },
     email :{
         type : String, 
@@ -13,6 +22,20 @@ const adminSchema = mongoose.Schema({
     password: {
         type: String,
         required : [true, "please add the admin password"],
+    },
+    phone: {
+        type: String,
+        required: [true, "Please add the admin phone number"],
+    },
+    epfRegNo : {
+        type : String,
+        required: [true, "Please add the admin epfRegNo"],
+        unique : [true, "This epfRegNo is already exsit"]
+    },
+    agentNo : {
+        type : String,
+        required: [true, "Please add the admin agentNo"],
+        unique : [true, "This agentNo is already exsit"]
     },
     adminRole:{
         type: String,

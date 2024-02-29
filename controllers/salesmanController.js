@@ -5,37 +5,52 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 
 const createsalesman = asyncHandler(async (req, res) => {
-  const { name, email, password } = req.body;
+  const { firstname, lastname, username, email, password, phone, agentNo } = req.body;
 
-  if (!name || !email || !password) {
+  if (!firstname || !lastname || !username || !email || !password || !phone  || !agentNo) {
     return res.status(400).json({ message: "All fields are mandatory" });
   }
 
+  // Hashing the password
   const hashedPassword = await bcrypt.hash(password, 10);
-  if(req.user.role == "admin"){
+
+  // Check if the user making the request is an admin
+  if (req.user.role === "admin") {
+    // Create a new salesman
     const salesman = await Salesman.create({
-      name,
+      firstname,
+      lastname,
+      username,
       email,
       password: hashedPassword,
-      admin_id: req.user.id,
+      phone,
+      agentNo,
+      admin_id: req.user.id, // Assuming you have admin_id in your Salesman schema
     });
+
+
+    // Create a new user associated with the salesman
     const user = await User.create({
-      username: name,
+      firstname,
+      lastname,
+      username,
       email,
-      password : hashedPassword,
-      role: "salesman",
-      registerId: salesman._id
+      password: hashedPassword,
+      role: "sales",
+      registerId: salesman._id,
     });
-    salesman.userId=user._id
+
+    // Link the user ID to the salesman
+    salesman.userId = user._id;
     await salesman.save();
 
     res.status(201).json(salesman);
-  }
-  else{
+  } else {
     res.status(400);
     throw new Error("Not an authorized user");
   }
-  });
+});
+
 
 
 //@desc Login a user
@@ -43,15 +58,15 @@ const createsalesman = asyncHandler(async (req, res) => {
 //@access public
 const loginsalesman = asyncHandler(async(req, res) => {
     //fetching the email and password from the body
-    const { email, password } = req.body;
-    if (!email || !password) {
+    const { username, password } = req.body;
+    if (!username || !password) {
         res.status(400);
         throw new Error("All fields are mandatory!");
     }
 
     
     //taking the email from the req body and finding it from the db
-    const salesman = await Salesman.findOne({ email });
+    const salesman = await Salesman.findOne({ username });
     console.log(salesman);
 
     //comparing the entered password with hashed password
@@ -60,13 +75,15 @@ const loginsalesman = asyncHandler(async(req, res) => {
         const accessToken = jwt.sign(
           
             {
-                //payload
-                user: {
-                    name: salesman.name,
-                    role: "salesman",
-                    email: salesman.email,
-                    id: salesman.id,
-                },
+              //payload
+              user: {
+                firstname: salesman.firstname,
+                lastname: salesman.lastname,
+                username: salesman.username,
+                role: "sales",
+                email: salesman.email,
+                id: salesman.id,
+              },
             },
             //access token secret
             process.env.ACCESS_TOKEN_SECRET,
