@@ -4,12 +4,15 @@ const upload = require("../middleware/upload");
 
 const {  
     getCustomers,
+    getAllCustomers,
     createCustomer,
     getCustomer,
     updateCustomer,
     deleteCustomer,
 } = require("../controllers/customerController");
 const validateToken = require("../middleware/validateTokenHandler");
+
+router.route("/all").get(getAllCustomers);
 
 //once you made all the customer routes private it should be validated
 //using the validateToken middle weare to validate the route

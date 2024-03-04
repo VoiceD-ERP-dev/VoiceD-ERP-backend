@@ -10,15 +10,12 @@ const userRoutes = require("./routes/userRoutes");
 dotenv.config();
 connectiondb();
 
+
 const app = express();
 const port = process.env.PORT || 5000;
 
 app.use(express.json());
-app.use(cors({
-    origin: 'https://voice-d-erp-frontend.vercel.app',
-    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
-    credentials: true, // enable credentials (if needed)
-  }));
+app.use(cors({ origin: "http://localhost:5173" }));
 app.options("*", cors());
 app.use("/api/admins", require("./routes/adminRoutes"));
 app.use("/api/customers", require("./routes/customerRoutes"));
