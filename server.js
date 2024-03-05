@@ -7,9 +7,10 @@ const salesmanRoutes = require("./routes/salesmanRoutes");
 const orderRoutes = require("./routes/orderRoutes");
 const invoiceRoutes = require("./routes/invoiceRoutes");
 const userRoutes = require("./routes/userRoutes");
+const otp = require("./routes/otpRoutes");
+
 dotenv.config();
 connectiondb();
-
 
 const app = express();
 const port = process.env.PORT || 5000;
@@ -23,7 +24,7 @@ app.use("/api/salesmen", salesmanRoutes);
 app.use("/api/orders", orderRoutes);
 app.use("/api/invoices", invoiceRoutes);
 app.use("/api/users", userRoutes);
-
+app.use("/api/otp", otp);
 app.use(errorHandler);
 
 app.listen(port, () => {
