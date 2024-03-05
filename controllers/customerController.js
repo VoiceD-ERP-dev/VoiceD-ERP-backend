@@ -12,7 +12,17 @@ const sendPdfEmail = require('../config/pdfGenerator');
 const getCustomers = asyncHandler(async (req, res) => {    //async makes a function return a Promise
   //getting the customers from the db
   //getting all the customers created by the login in admin
-  const customers = await Customer.find({ user_id: req.user.id });  //await makes a function wait for a Promise
+  const customers = await Customer.find({ salesmanID: req.user.registeredId });  //await makes a function wait for a Promise
+    res.status(200).json(customers);
+  });
+
+//@desc Get all customers
+//@route GET /api/customers
+//@access private
+const getAllCustomers = asyncHandler(async (req, res) => {    //async makes a function return a Promise
+  //getting the customers from the db
+  //getting all the customers created by the login in admin
+  const customers = await Customer.find({});  //await makes a function wait for a Promise
     res.status(200).json(customers);
   });
 
@@ -28,7 +38,7 @@ const createCustomer = asyncHandler(async (req, res) => {
   }
 
   // Check if user is admin or salesman
-  if (!(req.user.role === "admin" || req.user.role === "salesman")) {
+  if (!(req.user.role === "admin" || req.user.role === "sales")) {
     return res.status(403).json({ message: "Not authorized" });
   }
   let pdfSent = false;
@@ -42,11 +52,12 @@ const createCustomer = asyncHandler(async (req, res) => {
       email,
       phone,
       address,
-      salesman : req.user.name,
-      salesmanID: req.user.id,
+      salesman : req.user.firstname +" " + req.user.lastname,
+      salesmanID: req.user.registerId,
       // Add other fields as needed
     });
   
+
     if (req.files) {
       const nicDocFiles = req.files['nicDoc'];
       const brDocFiles = req.files['brDoc'];
@@ -79,10 +90,19 @@ const createCustomer = asyncHandler(async (req, res) => {
       orderIds.push(order._id);
 
       // Create invoice
+      var paymentType = invoiceData.paymentType;
+      if(paymentType == "Direct Purchase"){
+        var invoiceStatus = "approved";
+      }else{
+        invoiceStatus = "pending"
+      }
+
       const newInvoice = await Invoice.create({
         customer: customer._id,
         order: order._id,
         paymentType: invoiceData.paymentType,
+        status: invoiceStatus,
+        registerId: req.user.registerId, 
       });
       invoiceIds.push(newInvoice._id);
 
@@ -234,6 +254,7 @@ const deleteCustomer = asyncHandler(async (req, res) => {
 
 module.exports = {
     getCustomers,
+    getAllCustomers,
     createCustomer,
     getCustomer,
     updateCustomer,

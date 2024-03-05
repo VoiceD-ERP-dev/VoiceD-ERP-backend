@@ -1,5 +1,17 @@
 const mongoose = require("mongoose");
 
+const reasonSchema = mongoose.Schema({
+  reasonNo: {
+    type: String,
+  },
+  description: {
+    type: String,
+  },
+  dateAndTime: {
+    type: Date,
+  }
+});
+
 const invoiceSchema = mongoose.Schema({
   customer: {
     type: mongoose.Schema.Types.ObjectId,
@@ -24,6 +36,18 @@ const invoiceSchema = mongoose.Schema({
     unique: true,
     default: '000150' // Set a default value
   },
+  status: {
+    type: String,
+    required: true
+  },
+  proofDocs: {
+    type: String
+  },
+  registerId:{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "registerId",
+  },
+  rejectReason: [reasonSchema]
 }, {
   timestamps: true
 });

@@ -83,7 +83,8 @@ const loginUser = asyncHandler(async (req, res) => {
               username: user.username,
               role: user.role,
               email: user.email,
-              id: user.id,
+              id: user._id,
+              registerId : user.registerId,
             },
           },
           //access token secret
