@@ -106,7 +106,7 @@ const getAllSalesmen = asyncHandler(async (req, res) => {
     const admin = req.params.role;
 
     // Fetching all salesmen associated with the specified user ID
-    const salesmen = await Salesman.find({ admin });
+    const salesmen = await Salesman.find();
 
     if (!salesmen || salesmen.length === 0) {
         res.status(404);
@@ -116,4 +116,17 @@ const getAllSalesmen = asyncHandler(async (req, res) => {
     res.status(200).json(salesmen);
 });
 
-  module.exports = { createsalesman, loginsalesman,getAllSalesmen };
+//@desc Get new customers
+//@route GET /api/customers/:id
+//@access private
+const getseller = asyncHandler(async (req, res) => {
+  //getting the customer by id
+  const salesman = await Salesman.findById(req.params.id);
+  if(!salesman) {
+    res.status(404);
+    throw new Error("Customer not found");
+  }
+
+  res.status(200).json(salesman);
+});
+  module.exports = { createsalesman, loginsalesman,getAllSalesmen,getseller };

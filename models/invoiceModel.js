@@ -43,6 +43,10 @@ const invoiceSchema = mongoose.Schema({
   proofDocs: {
     type: String
   },
+  registerId:{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "registerId",
+  },
   rejectReason: [reasonSchema]
 }, {
   timestamps: true

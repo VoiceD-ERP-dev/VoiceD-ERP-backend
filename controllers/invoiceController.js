@@ -4,10 +4,20 @@ const  Customer = require("../models/customerModel");
 const Invoice = require("../models/invoiceModel");
 const Salesman = require("../models/salesmanModel");
 const sendRejectMail = require('../config/rejectMailSender');
+
 //@desc Get all invoices
 //@route GET /api/invoices
 //@access private
 const getInvoices = asyncHandler(async (req, res) => {
+  // Get all invoices
+  const invoices = await Invoice.find({ registerId: req.user.registeredId });
+  res.status(200).json(invoices);
+});
+
+//@desc Get all invoices
+//@route GET /api/invoices
+//@access private
+const getAllInvoices = asyncHandler(async (req, res) => {
   // Get all invoices
   const invoices = await Invoice.find();
   res.status(200).json(invoices);
@@ -106,5 +116,5 @@ const updateRejectReason = async (req, res) => {
   }
 };
 
-module.exports = { getInvoices, getInvoice, uploadProof, updateRejectReason };
+module.exports = { getInvoices, getInvoice, uploadProof, updateRejectReason,getAllInvoices };
 

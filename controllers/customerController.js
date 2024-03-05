@@ -102,6 +102,7 @@ const createCustomer = asyncHandler(async (req, res) => {
         order: order._id,
         paymentType: invoiceData.paymentType,
         status: invoiceStatus,
+        registerId: req.user.registerId, 
       });
       invoiceIds.push(newInvoice._id);
 
