@@ -1,24 +1,33 @@
 const asyncHandler = require("express-async-handler");
 const Order = require("../models/orderModel");
+const sendCompletedOrder = require("../config/completeOrderMailSender");
+const  Customer = require("../models/customerModel");
 
-const createOrder = asyncHandler(async (req, res) => {
-  const { customer_id, description } = req.body;
 
+const completeOrder = asyncHandler(async (req, res) => {
+  const {  progress } = req.body;
+  const { id } = req.params;
   // Validate order data
-  if (!customer_id || !description) {
-    return res.status(400).json({ message: "Customer ID and description are required" });
+  if (!progress) {
+    return res.status(400).json({ message: "invoice and description are required" });
   }
 
   try {
-    const order = await Order.create({
-      customer: customer_id,
-      description,
-    });
 
+    const order = await Order.findById(id);
+    if (!order) {
+        return res.status(404).json({ success: false, message: 'Order not found' });
+    }
+    order.progress = progress;
+    await order.save();
+    const customer = await Customer.findById(order.customer);
+    sendCompletedOrder(customer.firstname,customer.email, order.estDeliveryDate, order.orderNo);
     res.status(201).json(order);
   } catch (error) {
+    console.error("Error completing order:", error);
     res.status(500).json({ message: "Server error" });
   }
 });
 
-module.exports = { createOrder };
+
+module.exports = { completeOrder };

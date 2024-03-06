@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const upload = require("../middleware/upload");
-const {createInvoice, getInvoices, getInvoice,uploadProof,updateRejectReason,getAllInvoices } = require('../controllers/invoiceController');
+const {createInvoice, getInvoices, getInvoice,uploadProof,updateStatus,getAllInvoices } = require('../controllers/invoiceController');
 const validateToken = require("../middleware/validateTokenHandler");
 
 // @desc    Get all invoices
@@ -32,6 +32,6 @@ router.patch('/:id/uploadProof', upload.single('proofDoc'), uploadProof);
 // @desc    Update reject reason
 // @route   PATCH /api/invoices/:id/updateRejectReason
 // @access  Private
-router.patch('/:id/updateRejectReason', updateRejectReason);
+router.patch('/:id/updateStatus', updateStatus);
 
 module.exports = router;

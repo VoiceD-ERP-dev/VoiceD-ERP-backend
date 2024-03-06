@@ -13,7 +13,7 @@ const config = {
 
 const transporter = nodemailer.createTransport(config);
 
-const sendMailReject = (data) => {
+const sendMailpayment = (data) => {
     return new Promise((resolve, reject)=>{
         // Handle attachment as Buffer
         const attachments = [];
@@ -43,25 +43,26 @@ const sendMailReject = (data) => {
     });
 };
 
-async function sendRejectMail(subjectText,header1,header2,id,_id,firstname, lastname, email, salesman,description ) {
+async function sendPaymentConfirmation(email,firstname,orderNo,invoiceNo,paymentType,total,estDeliveryDate){
     
-    const subject = `${subjectText} - VDDG${id}`;
+    const subject = `Payment Confirmation - Order ORVDDG${orderNo}`;
     const html = `
-        <p style="font-size: 16px;">Dear ${salesman},</p>
+        <p style="font-size: 16px;">Dear ${firstname},</p>
 
-        <p style="font-size: 16px;">${header1}</p>
-        
+        <p style="font-size: 16px;">We hope this email finds you well. We are writing to confirm the receipt of your recent payment for Invoice VDDG${invoiceNo}. We sincerely appreciate your business and want to ensure that your payment has been successfully processed.</p>
+        <p style="font-size: 16px;">Payment Details: </p>
         <ul style="font-size: 16px;">
-            <li>Invoice ID: VDDG${id}</li>        
-            <li>Customer: ${firstname} ${lastname}</li>
-            <li>Customer ID: ${_id}</li>
-            <li>Reason: ${description}</li>
+            <li>Invoice No: VDDG${invoiceNo}</li>
+            <li>Payment Amount: Rs ${total}.00</li>
+            <li>Payment Method: ${paymentType}</li>
+            <li>Estimated Delivery Date: ${estDeliveryDate}</li>
         </ul>
+        
+        <p style="font-size: 16px;">We want to assure you that your payment has been securely processed, and your order is now confirmed. Our team is diligently working to fulfill your order, and we will keep you updated on its progress.</strong></p>
 
-        <p style="font-size: 16px;">${header2}</p>
-        <p style="font-size: 16px;">Thank you for your understanding and cooperation.</p>
+        <p style="font-size: 16px;">If you have any questions or concerns regarding your payment or order, please feel free to reach out to our customer service team. We are here to assist you every step of the way.</p>
 
-
+        <p style="font-size: 16px;">Once again, thank you for choosing VoiceD. We value your business and look forward to serving you again in the future.</p>
         <p style="font-size: 16px;">Best regards,</p>
         <p style="font-size: 16px;">VoiceD Team</p>
     `;
@@ -72,7 +73,7 @@ async function sendRejectMail(subjectText,header1,header2,id,_id,firstname, last
     try {
 
         // Send email with HTML content
-        await sendMailReject({ from, to, subject, html });
+        await sendMailpayment({ from, to, subject, html });
         console.log("Email sent successfully");
 
         return true;
@@ -82,4 +83,4 @@ async function sendRejectMail(subjectText,header1,header2,id,_id,firstname, last
     }
 }
 
-module.exports = sendRejectMail;
+module.exports = sendPaymentConfirmation;

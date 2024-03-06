@@ -13,7 +13,7 @@ const config = {
 
 const transporter = nodemailer.createTransport(config);
 
-const sendMailReject = (data) => {
+const sendMailCompleted = (data) => {
     return new Promise((resolve, reject)=>{
         // Handle attachment as Buffer
         const attachments = [];
@@ -43,25 +43,25 @@ const sendMailReject = (data) => {
     });
 };
 
-async function sendRejectMail(subjectText,header1,header2,id,_id,firstname, lastname, email, salesman,description ) {
+async function sendCompletedOrder(firstname,email, deliveryDate,orderNo) {
     
-    const subject = `${subjectText} - VDDG${id}`;
+    const subject = `Your Order ORVDDG${orderNo} Has Been Completed and Delivered Successfully`;
     const html = `
-        <p style="font-size: 16px;">Dear ${salesman},</p>
+        <p style="font-size: 16px;">Dear ${firstname},</p>
 
-        <p style="font-size: 16px;">${header1}</p>
+        <p style="font-size: 16px;">We are pleased to inform you that your order has been successfully completed and delivered to the specified address. Thank you for choosing VoiceD for your purchase.</p>
         
         <ul style="font-size: 16px;">
-            <li>Invoice ID: VDDG${id}</li>        
-            <li>Customer: ${firstname} ${lastname}</li>
-            <li>Customer ID: ${_id}</li>
-            <li>Reason: ${description}</li>
+        <li>Agent ID: ORVDDG${orderNo}</li>
+        <li>Delivery Date: ${deliveryDate}</li>
+        <li>Grace Period: 2 Weeks</li>
         </ul>
+        
+        <p style="font-size: 16px;">If you have any questions or concerns regarding your order, please feel free to contact our customer support team. We are here to assist you in any way we can.</strong></p>
 
-        <p style="font-size: 16px;">${header2}</p>
-        <p style="font-size: 16px;">Thank you for your understanding and cooperation.</p>
+        <p style="font-size: 16px;">Once again, thank you for businessing with us. We hope you enjoy your purchase!</p>
 
-
+        <p style="font-size: 16px;">Thank you for choosing VoiceD!</p>
         <p style="font-size: 16px;">Best regards,</p>
         <p style="font-size: 16px;">VoiceD Team</p>
     `;
@@ -72,7 +72,7 @@ async function sendRejectMail(subjectText,header1,header2,id,_id,firstname, last
     try {
 
         // Send email with HTML content
-        await sendMailReject({ from, to, subject, html });
+        await sendMailCompleted({ from, to, subject, html });
         console.log("Email sent successfully");
 
         return true;
@@ -82,4 +82,4 @@ async function sendRejectMail(subjectText,header1,header2,id,_id,firstname, last
     }
 }
 
-module.exports = sendRejectMail;
+module.exports = sendCompletedOrder;

@@ -20,6 +20,32 @@ const orderSchema = mongoose.Schema({
     unique: true,
     default: '000001' // Set a default value for order number
   },
+  package: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Package",
+  },
+  packageName:{
+    type: String,
+  },
+  invoiceDate:{
+    type: String,
+  },
+  responsibleDep:{
+    type: String,
+  },
+  managerInCharge:{
+    type: String,
+  },
+  startingDate:{
+    type: String,
+  },
+  progress:{
+    type: String,
+  },
+  estDeliveryDate:{
+    type: String,
+  }
+
 }, {
   timestamps: true
 });

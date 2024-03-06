@@ -8,7 +8,8 @@ const Package = require("../models/packageModel");
 const sendMail = require("../config/emailSender");
 const sendPdfEmail = require('../config/pdfGenerator');
 const { addWeeks, format } = require('date-fns');
-
+const Order = require("../models/orderModel");
+const sendPaymentConfirmation = require("../config/paymentMailSender");
 
 const createInvoice = asyncHandler(async(req,res) =>{
   const { customerId,paymentType,package,startupFee} = req.body;
@@ -109,6 +110,7 @@ const getInvoice = asyncHandler(async (req, res) => {
 });
 
 const uploadProof = asyncHandler(async (req,res) =>{
+
   try {
     const { id } = req.params;
     const invoice = await Invoice.findById(id);
@@ -130,18 +132,35 @@ const uploadProof = asyncHandler(async (req,res) =>{
 })
 
 // Controller function to update rejectReason field in an invoice
-const updateRejectReason = async (req, res) => {
-  try {
-      const { id } = req.params;
-      const { description } = req.body;
+const updateStatus = async (req, res) => {
+  const { status,responsibleDep,managerInCharge,startingDate,estDeliveryDate,packageName,description} = req.body;
+  const { id } = req.params;
+  // Find the invoice by ID
+  const invoice = await Invoice.findById(id);
+  if (!invoice) {
+      return res.status(404).json({ success: false, message: 'Invoice not found' });
+  }
 
-      // Find the invoice by ID
-      const invoice = await Invoice.findById(id);
+  // Retrieve the customer ID from the invoice
+  const customerId = invoice.customerId;
 
-      if (!invoice) {
-          return res.status(404).json({ success: false, message: 'Invoice not found' });
-      }
+  // Find the customer by ID
+  const customer = await Customer.findById(customerId);
 
+  if (!customer) {
+    return res.status(404).json({ success: false, message: 'Customer not found' });
+  }
+
+  // Extract required fields from the customer object
+  const { _id,firstname, lastname, salesman,salesmanID } = customer;
+
+  const sales = await Salesman.findById(salesmanID);
+  const{email} = sales;
+  // Log the extracted data
+  console.log('Customer Data:', { firstname, lastname, salesman, email });
+  
+  if(status=="Rejected"){
+    try {
       // Generate reasonNo (assuming it's the length of the existing rejectReason array + 1)
       const reasonNo = invoice.rejectReason.length + 1;
 
@@ -151,42 +170,97 @@ const updateRejectReason = async (req, res) => {
           description,
           dateAndTime: new Date().toISOString() // Current timestamp
       };
-
+      invoice.status = status;
+      await invoice.save();
       // Add the new reject reason object to the rejectReason array
       invoice.rejectReason.push(newRejectReason);
 
       // Save the updated invoice
       await invoice.save();
-
-            // Retrieve the customer ID from the invoice
-      const customerId = invoice.customer;
-
-      // Find the customer by ID
-      const customer = await Customer.findById(customerId);
-
-      if (!customer) {
-        return res.status(404).json({ success: false, message: 'Customer not found' });
-      }
-
-      // Extract required fields from the customer object
-      const { _id,firstname, lastname, salesman,salesmanID } = customer;
-
-      const sales = await Salesman.findById(salesmanID);
-      const{email} = sales;
-      // Log the extracted data
-      console.log('Customer Data:', { firstname, lastname, salesman, email });
-
-      const pdfSent = await sendRejectMail(_id,firstname, lastname, email, salesman,description );
+      //--------------------------------------------------------------------------
+      let subjectText = "Rejection Notification: Invoice ";
+      let header1 = "We regret to inform you that recent invoice that you created has been rejected due to the following reason:";
+      let header2 = "If the customer still wishes to proceed with the transaction, please create a new invoice and initiate the process again. We appreciate your prompt attention to this matter.";
+      //--------------------------------------------------------------------------
+      const pdfSent = await sendRejectMail(subjectText,header1,header2,invoice.invoiceNo,_id,firstname, lastname, email, salesman,description );
       if(!pdfSent){
         throw new Error("Failed to send PDF via email!!")
       }
       // Respond with updated invoice
       res.status(200).json({ success: true, data: invoice });
-  } catch (error) {
+    } catch (error) {
       console.error('Error updating reject reason:', error);
       res.status(500).json({ success: false, message: 'Server error' });
   }
+  }else if(status=="Decline"){
+    try{
+      // Generate reasonNo (assuming it's the length of the existing rejectReason array + 1)
+      const reasonNo = invoice.declineReason.length + 1;
+
+      // Create a new reject reason object
+      const newdeclineReason = {
+          reasonNo,
+          description,
+          dateAndTime: new Date().toISOString() // Current timestamp
+      };
+      invoice.status = "Pending (Declined "+ reasonNo + " times)";
+      // Add the new reject reason object to the rejectReason array
+      invoice.declineReason.push(newdeclineReason);
+
+      // Save the updated invoice
+      await invoice.save();
+
+      //--------------------------------------------------------------------------
+      let subjectText = "Declension Notification - Payment Slip Uploaded : Invoice ";
+      let header1 = "We regret to inform you that recent the Payment slip you uploaded has been rejected due to the following reason:";
+      let header2 = "Please review the provided reason and ensure that your next upload meets our requirements. We kindly request you to upload the corrected photo within the next 24 hours.";
+      //--------------------------------------------------------------------------
+      const pdfSent = await sendRejectMail(subjectText,header1,header2,invoice.invoiceNo,_id,firstname, lastname, email, salesman,description );
+      if(!pdfSent){
+        throw new Error("Failed to send PDF via email!!")
+      }
+      // Respond with updated invoice
+      res.status(200).json({ success: true, data: invoice });
+    } catch (error) {
+      console.error('Error updating reject reason:', error);
+      res.status(500).json({ success: false, message: 'Server error' });
+    }
+  }else if(status=="Accept"){
+    try{
+      const order = await Order.create({
+        customer: customerId,
+        invoice: invoice._id,
+        package:invoice.package,
+        packageName,
+        invoiceDate:invoice.createdAt,
+        responsibleDep,
+        managerInCharge,
+        startingDate,
+        progress:"InProgress",
+        estDeliveryDate,
+        description,
+      });
+      customer.orders.push(order._id);
+      await customer.save();
+
+      invoice.order = order._id;
+      invoice.status = status;
+      await invoice.save();
+
+      const package = await Package.findById(invoice.package);
+      const{packagePrice} = package;
+      let total = parseInt(packagePrice) + 2990;
+      console.log(total);
+      sendPaymentConfirmation(customer.email,firstname,order.orderNo,invoice.invoiceNo,invoice.paymentType,total,order.estDeliveryDate)
+      
+      res.status(201).json(order);
+    } catch (error) {
+      console.error('Error updating reject reason:', error);
+      res.status(500).json({ success: false, message: 'Server error' });
+    }
+  }
+
 };
 
-module.exports = {createInvoice, getInvoices, getInvoice, uploadProof, updateRejectReason,getAllInvoices };
+module.exports = {createInvoice, getInvoices, getInvoice, uploadProof, updateStatus,getAllInvoices };
 

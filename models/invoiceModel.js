@@ -47,7 +47,8 @@ const invoiceSchema = mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: "registerId",
   },
-  rejectReason: [reasonSchema]
+  rejectReason: [reasonSchema],
+  declineReason: [reasonSchema],
 }, {
   timestamps: true
 });
