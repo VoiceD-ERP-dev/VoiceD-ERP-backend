@@ -22,7 +22,7 @@ router.route("/cv").get(getCustomers).post(upload.fields([
     { name: 'brDoc', maxCount: 10 },
     { name: 'otherDoc', maxCount: 10 }
 ]), createCustomer);
-router.route("/:id").get(getCustomer).put(updateCustomer).delete(deleteCustomer);
-
+router.route("/search/:id").get(getCustomer);
+router.route("/update/:id").put(updateCustomer).delete(deleteCustomer);
 
 module.exports = router;

@@ -10,6 +10,10 @@ const packageSchema = mongoose.Schema({
     type: String,
     required: true,
   },
+  packagePrice: {
+    type: String,
+    required: true,
+  },
   startupFee: {
     type: String,
     required: true,

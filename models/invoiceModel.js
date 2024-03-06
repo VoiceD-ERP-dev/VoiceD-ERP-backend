@@ -13,7 +13,7 @@ const reasonSchema = mongoose.Schema({
 });
 
 const invoiceSchema = mongoose.Schema({
-  customer: {
+  customerId: {
     type: mongoose.Schema.Types.ObjectId,
     required: true,
     ref: "Customer",

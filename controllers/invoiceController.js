@@ -4,6 +4,78 @@ const  Customer = require("../models/customerModel");
 const Invoice = require("../models/invoiceModel");
 const Salesman = require("../models/salesmanModel");
 const sendRejectMail = require('../config/rejectMailSender');
+const Package = require("../models/packageModel");
+const sendMail = require("../config/emailSender");
+const sendPdfEmail = require('../config/pdfGenerator');
+const { addWeeks, format } = require('date-fns');
+
+
+const createInvoice = asyncHandler(async(req,res) =>{
+  const { customerId,paymentType,package,startupFee} = req.body;
+  if (!(req.user.role === "admin" || req.user.role === "sales")) {
+    return res.status(403).json({ message: "Not authorized" });
+  }
+  try{
+    let packagePrice = "";
+    if (package === "Basic") {
+      packagePrice = 3000;
+    } else if (package === "Platinum") {
+      packagePrice = 7000;
+    } else {
+      packagePrice = 12000;
+    }
+
+    const newInvoice = await Invoice.create({
+      customerId,
+      paymentType,
+      status: "Pending",
+      registerId: req.user.registerId, 
+    });
+  
+    const newPackage = await Package.create({
+      package,
+      startupFee,
+      invoice: newInvoice._id,
+      packagePrice: packagePrice,
+    });
+  
+    newInvoice.package = newPackage._id;
+    await newInvoice.save();
+    res.status(201).json(newInvoice);
+
+    let orderId = newInvoice.invoiceNo;
+    let invoiceId = newInvoice.invoiceNo;
+    const customer = await Customer.findById(customerId);
+
+    customer.invoice.push(newInvoice._id);
+    await customer.save();
+
+    if (!customer) {
+      return res.status(404).json({ success: false, message: 'Customer not found' });
+    }
+
+    // Extract required fields from the customer object
+    const {firstname, lastname,email,nicNo,address, phone, } = customer;
+//---------------------------------------------------------------------------------
+    const today = new Date();
+    const formattedDueDate = addWeeks(today, 2);
+    const duedate = format(formattedDueDate, 'yyyy/MM/dd');
+    const currentDate = format(today, 'yyyy/MM/dd');
+    console.log("Current Date:", currentDate);
+    console.log("Due Date:", duedate);
+    
+//--------------------------------------------------------------------------------
+
+    const pdfSent = await sendPdfEmail(firstname, lastname,email,nicNo,address, phone,invoiceId,orderId,currentDate,duedate,package,packagePrice,startupFee);
+    if(!pdfSent){
+      throw new Error("Failed to send PDF via email!!")
+    }
+
+  } catch (error) {
+    console.error("Error creating package:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+});
 
 //@desc Get all invoices
 //@route GET /api/invoices
@@ -116,5 +188,5 @@ const updateRejectReason = async (req, res) => {
   }
 };
 
-module.exports = { getInvoices, getInvoice, uploadProof, updateRejectReason,getAllInvoices };
+module.exports = {createInvoice, getInvoices, getInvoice, uploadProof, updateRejectReason,getAllInvoices };
 

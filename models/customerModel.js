@@ -43,10 +43,6 @@ const customerSchema = mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: "Order",
   }],
-  orders: [{
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "Order",
-  }],
   otherDoc: [String],
   brDoc: [String],
   nicDoc: [String],

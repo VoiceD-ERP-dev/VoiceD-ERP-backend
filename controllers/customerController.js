@@ -33,7 +33,7 @@ const createCustomer = asyncHandler(async (req, res) => {
   const { firstname,lastname,nicNo,brId, email, phone,address,invoice } = req.body;
 
   // Validate customer data
-   if (!firstname || !lastname || !nicNo || !brId || !email || !phone || !address || !invoice || !Array.isArray(invoice) || invoice.length === 0) {
+   if (!firstname || !lastname || !nicNo || !brId || !email || !phone || !address) {
      return res.status(400).json({ message: "Invalid request format" });
   }
 
@@ -41,7 +41,7 @@ const createCustomer = asyncHandler(async (req, res) => {
   if (!(req.user.role === "admin" || req.user.role === "sales")) {
     return res.status(403).json({ message: "Not authorized" });
   }
-  let pdfSent = false;
+
   try {
     // Create customer
     const customer = await Customer.create({
@@ -57,7 +57,6 @@ const createCustomer = asyncHandler(async (req, res) => {
       // Add other fields as needed
     });
   
-
     if (req.files) {
       const nicDocFiles = req.files['nicDoc'];
       const brDocFiles = req.files['brDoc'];
@@ -66,124 +65,14 @@ const createCustomer = asyncHandler(async (req, res) => {
       if (nicDocFiles) {
         nicDocFiles.forEach(file => customer.nicDoc.push(file.path));
       }
-
       if (brDocFiles) {
         brDocFiles.forEach(file => customer.brDoc.push(file.path));
       }
-
       if (otherDocFiles) {
         otherDocFiles.forEach(file => customer.otherDoc.push(file.path));
       }
     }
-
-    const orderIds = [];
-    const invoiceIds = [];
-
-    // Loop through each invoice and create orders and invoices for the customer
-    for (const invoiceData of invoice) {
-      // Create order
-      const order = await Order.create({
-        customer: customer._id,
-        description: invoiceData.order.description,
-        
-      });
-      orderIds.push(order._id);
-
-      // Create invoice
-      var paymentType = invoiceData.paymentType;
-      if(paymentType == "Direct Purchase"){
-        var invoiceStatus = "approved";
-      }else{
-        invoiceStatus = "pending"
-      }
-
-      const newInvoice = await Invoice.create({
-        customer: customer._id,
-        order: order._id,
-        paymentType: invoiceData.paymentType,
-        status: invoiceStatus,
-        registerId: req.user.registerId, 
-      });
-      invoiceIds.push(newInvoice._id);
-
-      const newPackage = await Package.create({
-        package: invoiceData.package.package,
-        startupFee: invoiceData.package.startupFee,
-        invoice: newInvoice._id,
-      });
-      let startupFee = invoiceData.package.startupFee;
-      let package= invoiceData.package.package;
-      let packagePrice = "";
-      if (invoiceData.package.package === "Basic") {
-        packagePrice = 3000;
-    
-      } else if (invoiceData.package.package === "Platinum") {
-        packagePrice = 7000;
-      } else {
-        packagePrice = 12000;
-      }
-
-
-      order.invoice = newInvoice._id;
-      await order.save();
-
-      //---------------------------------------------------------------------------------
-      const today = new Date();
-
-      // Get the current year, month, and day
-      let year = today.getFullYear();
-      let month = today.getMonth() + 1; // Note: January is 0
-      let day = today.getDate();
-      
-      // Ensure month and day are two digits
-      month = month < 10 ? '0' + month : month;
-      day = day < 10 ? '0' + day : day;
-      
-      // Set currentDate in the specified format (yyyy/mm/dd)
-      const currentDate = `${year}/${month}/${day}`;
-      
-      // Add two months to the current month
-      month += 2;
-      
-      // Check if the month exceeds 12 (December), adjust year and month accordingly
-      if (month > 12) {
-        month -= 12; // Reset month to January
-        
-      }
-      
-      // Ensure month is two digits
-      month = month < 10 ? '0' + month : month;
-      
-      // Get the last day of the next month
-      const lastDayOfMonth = new Date(year, month, 0).getDate();
-      
-      // Set duedate to the last day of the next month
-      const duedate = `${year}/${month}/${lastDayOfMonth}`;
-      
-      console.log("Current Date:", currentDate);
-      console.log("Due Date:", duedate);
-      
-      
-      //--------------------------------------------------------------------------------
-
-      let orderId = order.orderNo;
-      let invoiceId = newInvoice.invoiceNo;
-      newInvoice.package = newPackage._id;
-      await newInvoice.save();
-      const pdfSent = await sendPdfEmail(firstname, lastname,email,nicNo,address, phone,invoiceId,orderId,currentDate,duedate,package,packagePrice,startupFee);
-      if(!pdfSent){
-        throw new Error("Failed to send PDF via email!!")
-      }
-    }
-
-
-    // Update customer with order IDs
-    customer.orders = orderIds;
-    customer.invoice = invoiceIds;
     await customer.save();
-
-
-    
 
     res.status(201).json(customer);
   } catch (error) {
@@ -192,7 +81,7 @@ const createCustomer = asyncHandler(async (req, res) => {
   }
 });
 
-module.exports = { createCustomer };
+
 
 //@desc Get new customers
 //@route GET /api/customers/:id

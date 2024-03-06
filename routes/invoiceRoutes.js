@@ -1,9 +1,13 @@
 const express = require("express");
 const router = express.Router();
 const upload = require("../middleware/upload");
-const { getInvoices, getInvoice,uploadProof,updateRejectReason,getAllInvoices } = require('../controllers/invoiceController');
+const {createInvoice, getInvoices, getInvoice,uploadProof,updateRejectReason,getAllInvoices } = require('../controllers/invoiceController');
 const validateToken = require("../middleware/validateTokenHandler");
 
+// @desc    Get all invoices
+// @route   GET /api/invoices
+// @access  Private
+router.post('/create',validateToken, createInvoice);
 
 // @desc    Get all invoices
 // @route   GET /api/invoices
