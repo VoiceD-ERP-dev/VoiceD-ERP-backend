@@ -48,7 +48,7 @@ const registerAdmin = asyncHandler(async(req,res) =>{
       username,
       email,
       password : hashedPassword,
-      role: "admin",
+      role: adminRole,
       registerId: admin._id
     });
 
