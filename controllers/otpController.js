@@ -62,16 +62,17 @@ const compareOTP = (req, res) => {
         return;
     }
 
+
     // Retrieve stored OTP for the provided phone number
     const storedOTP = otpData.otp;
 
     if (userOTP === storedOTP) {
         // OTP is correct
         otpDataArray.splice(otpDataIndex, 1); // Remove OTP data after successful validation
-        res.status(200).json({ message: "OTP is correct" });
+        res.status(200).json({ message: "Mobile Number Verified" });
     } else {
         // OTP is incorrect
-        res.status(400).json({ message: "OTP is incorrect" });
+        res.status(401).json({ message: "OTP is incorrect" });
     }
 };
 

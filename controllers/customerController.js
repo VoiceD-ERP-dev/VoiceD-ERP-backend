@@ -38,7 +38,7 @@ const createCustomer = asyncHandler(async (req, res) => {
   }
 
   // Check if user is admin or salesman
-  if (!(req.user.role === "admin" || req.user.role === "sales")) {
+  if (!(req.user.role === "admin" || req.user.role === "sales" ||req.user.role === "superadmin" )) {
     return res.status(403).json({ message: "Not authorized" });
   }
 
@@ -140,6 +140,15 @@ const deleteCustomer = asyncHandler(async (req, res) => {
     res.status(200).json(customer); 
   });
 
+//@desc Get all customers
+//@route GET /api/customers
+//@access private
+const getCustomerbyContact = asyncHandler(async (req, res) => {    //async makes a function return a Promise
+  //getting the customers from the db
+  //getting all the customers created by the login in admin
+  const customers = await Customer.find({ phone: req.params.id});  //await makes a function wait for a Promise
+    res.status(200).json(customers);
+});
 
 module.exports = {
     getCustomers,
@@ -148,5 +157,5 @@ module.exports = {
     getCustomer,
     updateCustomer,
     deleteCustomer,
-    
+    getCustomerbyContact
   };

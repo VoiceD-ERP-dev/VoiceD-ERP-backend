@@ -9,6 +9,7 @@ const {
     getCustomer,
     updateCustomer,
     deleteCustomer,
+    getCustomerbyContact,
 } = require("../controllers/customerController");
 const validateToken = require("../middleware/validateTokenHandler");
 
@@ -24,5 +25,5 @@ router.route("/cv").get(getCustomers).post(upload.fields([
 ]), createCustomer);
 router.route("/search/:id").get(getCustomer);
 router.route("/update/:id").put(updateCustomer).delete(deleteCustomer);
-
+router.route("/findbyPhone/:id").get(getCustomerbyContact);
 module.exports = router;
