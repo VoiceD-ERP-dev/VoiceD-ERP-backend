@@ -13,7 +13,7 @@ const sendPaymentConfirmation = require("../config/paymentMailSender");
 
 const createInvoice = asyncHandler(async(req,res) =>{
   const { customerId,paymentType,package,startupFee} = req.body;
-  if (!(req.user.role === "admin" || req.user.role === "sales")) {
+  if (!(req.user.role === "admin" || req.user.role === "sales" ||req.user.role === "superadmin" )) {
     return res.status(403).json({ message: "Not authorized" });
   }
   try{
