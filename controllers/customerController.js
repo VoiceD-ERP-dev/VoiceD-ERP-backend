@@ -30,15 +30,15 @@ const getAllCustomers = asyncHandler(async (req, res) => {    //async makes a fu
 //@routs POST /api/customers/
 //@access private
 const createCustomer = asyncHandler(async (req, res) => {
-  const { firstname,lastname,nicNo,brId, email, phone,address,invoice } = req.body;
+  const { firstname, lastname, nicNo, brId, email, phone, address, invoice } = req.body;
 
   // Validate customer data
-   if (!firstname || !lastname || !nicNo || !brId || !email || !phone || !address) {
-     return res.status(400).json({ message: "Invalid request format" });
+  if (!firstname || !lastname || !nicNo || !brId || !email || !phone || !address) {
+    return res.status(400).json({ message: "Invalid request format" });
   }
 
   // Check if user is admin or salesman
-  if (!(req.user.role === "admin" || req.user.role === "sales" ||req.user.role === "superadmin" )) {
+  if (!(req.user.role === "admin" || req.user.role === "sales" || req.user.role === "superadmin")) {
     return res.status(403).json({ message: "Not authorized" });
   }
 
@@ -52,11 +52,11 @@ const createCustomer = asyncHandler(async (req, res) => {
       email,
       phone,
       address,
-      salesman : req.user.firstname +" " + req.user.lastname,
+      salesman: req.user.firstname + " " + req.user.lastname,
       salesmanID: req.user.registerId,
       // Add other fields as needed
     });
-  
+
     if (req.files) {
       const nicDocFiles = req.files['nicDoc'];
       const brDocFiles = req.files['brDoc'];
@@ -72,14 +72,26 @@ const createCustomer = asyncHandler(async (req, res) => {
         otherDocFiles.forEach(file => customer.otherDoc.push(file.path));
       }
     }
+
     await customer.save();
 
     res.status(201).json(customer);
   } catch (error) {
+    // Check if the error is due to duplicate key violation (email or phone already registered)
+    if (error.code === 11000 || error.code === 11001) {
+      let errorMessage = "";
+      if (error.keyPattern.email) {
+        errorMessage = "Email is already registered";
+      } else if (error.keyPattern.phone) {
+        errorMessage = "Phone number is already registered";
+      }
+      return res.status(400).json({ message: errorMessage });
+    }
     console.error("Error creating package:", error);
     res.status(500).json({ message: "Server error" });
   }
 });
+
 
 
 
