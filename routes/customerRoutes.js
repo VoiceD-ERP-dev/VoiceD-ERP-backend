@@ -24,6 +24,6 @@ router.route("/cv").get(getCustomers).post(upload.fields([
     { name: 'otherDoc', maxCount: 10 }
 ]), createCustomer);
 router.route("/search/:id").get(getCustomer);
-router.route("/update/:id").put(updateCustomer).delete(deleteCustomer);
+router.route("/update/:id").patch(updateCustomer).delete(deleteCustomer);
 router.route("/findbyPhone/:id").get(getCustomerbyContact);
 module.exports = router;

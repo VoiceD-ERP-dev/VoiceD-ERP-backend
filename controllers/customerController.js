@@ -100,24 +100,28 @@ const getCustomer = asyncHandler(async (req, res) => {
 //@route UPDATE /api/customers/:id
 //@access private
 const updateCustomer = asyncHandler(async (req, res) => {
-    const customer = await Customer.findById(req.params.id);
-    if(!customer) {
-      res.status(404);
-      throw new Error("Customer not found");
-    }
-    //checking weather the admin id of the login admin is matching with the updating customer
-    if (customer.user_id.toString() !== req.admin.id) {
-      res.status(402);
-      throw new Error("User don't have permission to update this");
-    }
-    const updatedCustomer = await Customer.findByIdAndUpdate(
-      req.params.id, //getting the id of the customer that needs to be updated
-      req.body, //getting the updated body
-      { new: true } //query option
-    );
-  
-  
-    res.status(200).json(updatedCustomer);
+  const {  firstname,lastname,nicNo,brId,email,phone,address } = req.body;
+  const customer = await Customer.findById(req.params.id);
+  if(!customer) {
+    res.status(404);
+    throw new Error("Customer not found");
+  }
+  try{
+    customer.firstname = firstname;
+    customer.lastname =lastname;
+    customer.nicNo =nicNo;
+    customer.brId =brId;
+    customer.email =email;
+    customer.phone =phone;
+    customer.address =address;
+    await customer.save();
+    res.status(200).json(customer);
+  } catch (error) {
+    console.error('Error updating:', error);
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+
+
   });
 
 
@@ -149,6 +153,8 @@ const getCustomerbyContact = asyncHandler(async (req, res) => {    //async makes
   const customers = await Customer.find({ phone: req.params.id});  //await makes a function wait for a Promise
     res.status(200).json(customers);
 });
+
+
 
 module.exports = {
     getCustomers,

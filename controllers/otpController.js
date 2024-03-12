@@ -53,7 +53,7 @@ const compareOTP = (req, res) => {
     // Check if OTP is expired
     const currentTime = new Date();
     const timeDifference = currentTime - otpData.creationTime;
-    const expirationTime = 300 * 1000; // 5 minutes in milliseconds
+    const expirationTime = 15 * 1000; // 5 minutes in milliseconds
 
     if (timeDifference > expirationTime) {
         // OTP is expired
