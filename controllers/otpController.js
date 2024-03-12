@@ -32,6 +32,14 @@ const generateOTP = (req, res) => {
     );
 
     res.status(200).json({ otp: OTP });
+        // Delete OTP data after 5 minutes
+        setTimeout(() => {
+            const index = otpDataArray.findIndex(data => data.phoneNo === phoneNo);
+            if (index !== -1) {
+                otpDataArray.splice(index, 1);
+                console.log(`OTP data for phone number ${phoneNo} deleted after 5 minutes.`);
+            }
+        }, 1 * 60 * 1000); // 5 minutes in milliseconds
 };
 
 
@@ -43,7 +51,7 @@ const compareOTP = (req, res) => {
 
     if (otpDataIndex === -1) {
         // Phone number not found in OTP data array
-        res.status(400).json({ message: "Phone number not found" });
+        res.status(400).json({ message: "OTP is expired" });
         return;
     }
 
@@ -53,7 +61,7 @@ const compareOTP = (req, res) => {
     // Check if OTP is expired
     const currentTime = new Date();
     const timeDifference = currentTime - otpData.creationTime;
-    const expirationTime = 15 * 1000; // 5 minutes in milliseconds
+    const expirationTime = 60 * 1000; // 5 minutes in milliseconds
 
     if (timeDifference > expirationTime) {
         // OTP is expired
