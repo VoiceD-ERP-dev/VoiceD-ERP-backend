@@ -10,11 +10,12 @@ const {
     updateCustomer,
     deleteCustomer,
     getCustomerbyContact,
+    downloadDocs
 } = require("../controllers/customerController");
 const validateToken = require("../middleware/validateTokenHandler");
 
 router.route("/all").get(getAllCustomers);
-
+router.route("/download/:filename").get(downloadDocs);
 //once you made all the customer routes private it should be validated
 //using the validateToken middle weare to validate the route
 router.use(validateToken);   //this will walidate all the rutes

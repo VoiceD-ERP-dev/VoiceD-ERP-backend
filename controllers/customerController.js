@@ -5,7 +5,8 @@ const Invoice = require("../models/invoiceModel");
 const Package = require("../models/packageModel");
 const sendMail = require("../config/emailSender");
 const sendPdfEmail = require('../config/pdfGenerator');
-
+const fs = require('fs');
+const path = require('path');
 //@desc Get all customers
 //@route GET /api/customers
 //@access private
@@ -154,6 +155,24 @@ const getCustomerbyContact = asyncHandler(async (req, res) => {    //async makes
     res.status(200).json(customers);
 });
 
+const downloadDocs = asyncHandler(async (req, res) => {
+  const fileName = req.params.filename;
+  const filePath = path.join(__dirname, '..', 'uploads', fileName); // Adjust the path here
+
+  // Check if the file exists
+  if (fs.existsSync(filePath)) {
+      // Set the appropriate headers
+      res.setHeader('Content-disposition', 'attachment; filename=' + fileName);
+      res.setHeader('Content-type', 'application/octet-stream');
+
+      // Stream the file to the response
+      const fileStream = fs.createReadStream(filePath);
+      fileStream.pipe(res);
+  } else {
+      // If the file does not exist, send a 404 error
+      res.status(404).send('File not found');
+  }
+});
 
 
 module.exports = {
@@ -163,5 +182,6 @@ module.exports = {
     getCustomer,
     updateCustomer,
     deleteCustomer,
-    getCustomerbyContact
+    getCustomerbyContact,
+    downloadDocs
   };

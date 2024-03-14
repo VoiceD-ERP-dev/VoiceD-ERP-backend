@@ -35,6 +35,12 @@ const customerSchema = mongoose.Schema({
   salesmanID: {
     type: String,
   },
+  customerNo: {
+    type: String,
+    required: true,
+    unique: true,
+    default: '000100' // Set a default value
+  },
   invoice: [{
     type: mongoose.Schema.Types.ObjectId,
     ref: "Invoice",
@@ -49,6 +55,35 @@ const customerSchema = mongoose.Schema({
 }, {
   timestamps: true
 });
+customerSchema.pre('save', async function(next) {
+  try {
+    if (!this.isNew || this.customerNo !== '000100') { // Check if it's new or customerNo is already set
+      return next();
+    }
 
-module.exports = mongoose.model("Customer", customerSchema);
+    let newCustomerNo = '000100';
+
+    // Find the last customer in the database
+    const lastCustomer = await this.constructor.findOne({}, {}, { sort: { 'createdAt': -1 } });
+    if (lastCustomer && lastCustomer.customerNo >= '000100') {
+      const lastCustomerNo = parseInt(lastCustomer.customerNo, 10);
+      if (!isNaN(lastCustomerNo)) { // Check if conversion to integer was successful
+        newCustomerNo = (lastCustomerNo + 1).toString().padStart(6, '0');
+      } else {
+        // Handle the case where the conversion failed
+        console.error('Failed to parse last customer number to integer.');
+      }
+    }
+
+    this.customerNo = newCustomerNo;
+    return next();
+  } catch (error) {
+    return next(error);
+  }
+});
+
+const Customer = mongoose.model('Customer', customerSchema);
+
+module.exports = Customer;
+
 
