@@ -7,68 +7,72 @@ const bcrypt = require("bcrypt");
 //@desc Register a admin
 //@routs POST /api/admins/register
 //@access public
-const registerAdmin = asyncHandler(async(req,res) =>{
-  //destructuring the request body sent from the client side
-  const { firstname,lastname,username, email, password,phone,epfRegNo,agentNo, adminRole } = req.body;
-  
-    //checking weather the fileds are empty
-    if(!username || !email || !password || !adminRole || !firstname || !lastname || !phone || !epfRegNo || !agentNo){
-        res.status(400);
-        throw new Error("All fields are mandatory!");
-    }
+const registerAdmin = asyncHandler(async (req, res) => {
+  try {
+      // Destructuring the request body sent from the client side
+      const { firstname, lastname, username, email, password, phone, agentNo, adminRole } = req.body;
 
-    //checking weather the email is already exist
-    const userAvailable = await Admin.findOne( {username} );
-    if(userAvailable){
-        res.status(400);
-        throw new Error("Admin alerady registered");
-    }
+      // Checking whether the fields are empty
+      if (!username || !email || !password || !adminRole || !firstname || !lastname || !phone || !agentNo) {
+          res.status(400);
+          throw new Error("All fields are mandatory!");
+      }
 
-    //encrypting the password using bcrypt lib
-    //creating a hashed password
-    //the two pars of this method are pw and number of salt rounds
-    const hashedPassword = await bcrypt.hash(password, 10);
-    console.log("Hashed password :" , hashedPassword); 
+      // Checking whether the username is already taken
+      const userAvailable = await Admin.findOne({ username });
+      if (userAvailable) {
+          res.status(400);
+          throw new Error("Admin already registered");
+      }
 
-    //create a new admin
-    const admin = await Admin.create({
-      firstname,
-      lastname,
-      username,
-      email,
-      password : hashedPassword,
-      phone,
-      epfRegNo,
-      agentNo,
-      adminRole
-    });
-    const user = await User.create({
-      firstname,
-      lastname,
-      username,
-      email,
-      password : hashedPassword,
-      role: adminRole,
-      registerId: admin._id
-    });
+      // Encrypting the password using bcrypt library
+      const hashedPassword = await bcrypt.hash(password, 10);
+      console.log("Hashed password:", hashedPassword);
 
-    admin.userId=user._id
-    await admin.save();
+      // Create a new admin
+      const admin = await Admin.create({
+          firstname,
+          lastname,
+          username,
+          email,
+          password: hashedPassword,
+          phone,
+          agentNo,
+          adminRole
+      });
 
-    console.log(`Admin created ${admin}`);
-    console.log(`Admin created ${user}`);
+      // Create a corresponding user
+      const user = await User.create({
+          firstname,
+          lastname,
+          username,
+          email,
+          password: hashedPassword,
+          role: adminRole,
+          agentNo,
+          registerId: admin._id
+      });
 
-    //if admin is successfully created send the info to the admin
-    if(admin){
-        res.status(201).json({ 
-            _id : admin.id,
-            username:admin.username
-        });
-        }else{
-        res.status(400);
-        throw new Error("Admin data not valid");
-        }
-        res.json({message: "Register the admin"});
+      admin.userId = user._id;
+      await admin.save();
+
+      console.log(`Admin created: ${admin}`);
+      console.log(`User created: ${user}`);
+
+      // If admin is successfully created, send the info to the client
+      if (admin) {
+          res.status(201).json({
+              _id: admin.id,
+              username: admin.username
+          });
+      } else {
+          res.status(400);
+          throw new Error("Admin data not valid");
+      }
+  } catch (error) {
+      console.error('Error in registerAdmin:', error);
+      res.status(500).json({ message: 'Internal Server Error' });
+  }
 });
 
 //@desc Login a admin

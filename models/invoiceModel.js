@@ -47,6 +47,17 @@ const invoiceSchema = mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: "registerId",
   },
+  agentNo : {
+    type : String,
+    required: [true, "Please add the admin agentNo"],
+    //unique : [true, "Agent number is already taken"]
+  },
+  customerNo: {
+    type: String,
+  },
+  customerName: {
+    type: String,
+  },
   rejectReason: [reasonSchema],
   declineReason: [reasonSchema],
 }, {

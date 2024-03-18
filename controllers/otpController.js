@@ -1,6 +1,7 @@
 const express = require("express");
 const asyncHandler = require("express-async-handler");
 const dotenv = require("dotenv");
+const  Customer = require("../models/customerModel");
 const sendSMS = require("../config/otpSender");
 dotenv.config();
 
@@ -8,30 +9,40 @@ dotenv.config();
 let otpDataArray = [];
 
 // Function to generate OTP
-const generateOTP = (req, res) => {
-    const { phoneNo } = req.body;
+const generateOTP = async (req, res) => {
+    const { phoneNo, nicNo, email, brId } = req.body;
     console.log("Phone: " + phoneNo);
+    // Remove the '+94' prefix and add '0'
+    const editedPhone = "0" + phoneNo.slice(3);
 
-    const digits = '0123456789';
-    let OTP = '';
-    for (let i = 0; i < 6; i++) {
-        OTP += digits[Math.floor(Math.random() * 10)];
-    }
-    
-    // Store OTP data for the current phone number
-    otpDataArray.push({
-        phoneNo: phoneNo,
-        otp: OTP,
-        creationTime: new Date()
-    });
+    // Log the result
+    console.log("Edited Phone:", editedPhone);
 
-    sendSMS(
-        process.env.TWILIO_PHONE_NUMBER,
-        phoneNo,
-        `Your OTP is: ${OTP}`
-    );
+    // Check if the phone number already exists in the customer collection
+    const existingCustomer = await Customer.findOne({ phone: editedPhone });
 
-    res.status(200).json({ otp: OTP });
+    if (!existingCustomer || (existingCustomer.nicNo !== nicNo || existingCustomer.email !== email || !existingCustomer.brId.includes(brId))) {
+        // If customer doesn't exist or NIC, email, or BRID doesn't match, generate OTP
+        const digits = '0123456789';
+        let OTP = '';
+        for (let i = 0; i < 6; i++) {
+            OTP += digits[Math.floor(Math.random() * 10)];
+        }
+        
+        // Store OTP data for the current phone number
+        otpDataArray.push({
+            phoneNo: phoneNo,
+            otp: OTP,
+            creationTime: new Date()
+        });
+
+        sendSMS(
+            process.env.TWILIO_PHONE_NUMBER,
+            phoneNo,
+            `Your OTP is: ${OTP}`
+        );
+
+        res.status(200).json({ otp: OTP });
         // Delete OTP data after 5 minutes
         setTimeout(() => {
             const index = otpDataArray.findIndex(data => data.phoneNo === phoneNo);
@@ -40,7 +51,11 @@ const generateOTP = (req, res) => {
                 console.log(`OTP data for phone number ${phoneNo} deleted after 5 minutes.`);
             }
         }, 1 * 60 * 1000); // 5 minutes in milliseconds
+    } else {
+        return res.status(400).json({ message: "Phone number already registered" });
+    }
 };
+
 
 
 const compareOTP = (req, res) => {

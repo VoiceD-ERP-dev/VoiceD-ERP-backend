@@ -27,11 +27,6 @@ const adminSchema = mongoose.Schema({
         type: String,
         required: [true, "Please add the admin phone number"],
     },
-    epfRegNo : {
-        type : String,
-        required: [true, "Please add the admin epfRegNo"],
-        unique : [true, "This epfRegNo is already exsit"]
-    },
     agentNo : {
         type : String,
         required: [true, "Please add the admin agentNo"],

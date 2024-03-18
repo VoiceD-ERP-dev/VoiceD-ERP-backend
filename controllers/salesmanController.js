@@ -38,6 +38,7 @@ const createsalesman = async (req, res) => {
           email,
           password: hashedPassword,
           role: "sales",
+          agentNo,
           registerId: salesman._id,
       });
 

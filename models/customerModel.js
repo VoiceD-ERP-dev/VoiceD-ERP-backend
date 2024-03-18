@@ -13,10 +13,10 @@ const customerSchema = mongoose.Schema({
     type: String,
     required: [true, "Please add the customer NIC"],
   },
-  brId: {
+  brId: [{
     type: String,
     required: [true, "Please add the customer BR ID"],
-  },
+  }],
   email: {
     type: String,
     required: [true, "Please add the customer email address"],
@@ -36,6 +36,11 @@ const customerSchema = mongoose.Schema({
   },
   salesmanID: {
     type: String,
+  },
+  agentNo : {
+    type : String,
+    required: [true, "Please add the admin agentNo"],
+    //unique : [true, "Agent number is already taken"]
   },
   customerNo: {
     type: String,

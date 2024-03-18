@@ -44,19 +44,53 @@ const createCustomer = asyncHandler(async (req, res) => {
   }
 
   try {
+    // Check if the email, phone, NIC, or BR ID already exist
+    const existingCustomer = await Customer.findOne({
+      $or: [{ email }, { phone }, { nicNo }, { brId }]
+    });
+
+    if (existingCustomer) {
+      let existingField;
+
+      if(existingCustomer.nicNo === nicNo && existingCustomer.phone === phone && existingCustomer.email === email && !existingCustomer.brId.includes(brId)){
+        // If NIC exists and BRID is different, add BRID to the existing customer's brId array
+        if (!existingCustomer.brId.includes(brId)) {
+          existingCustomer.brId.push(brId);
+          await existingCustomer.save();
+          return res.status(200).json({ message: `Added BRID ${brId} for existing customer` });
+        }
+      }else{
+        if (existingCustomer.email === email) {
+          existingField = "Email";
+        } else if (existingCustomer.phone === phone) {
+          existingField = "Phone";
+        } else if (existingCustomer.nicNo === nicNo) {
+          existingField = "NIC";
+
+        }else if (existingCustomer.nicNo === nicNo && existingCustomer.phone === phone && existingCustomer.email === email && !existingCustomer.brId.includes(brId)) { 
+
+        }else {
+          existingField = "BRID";
+        }
+        return res.status(400).json({ message: `${existingField} already registered` });
+      }
+    }
+
     // Create customer
     const customer = await Customer.create({
       firstname,
       lastname,
       nicNo,
-      brId,
+      brId: [brId],
       email,
       phone,
       address,
       salesman: req.user.firstname + " " + req.user.lastname,
       salesmanID: req.user.registerId,
+      agentNo: req.user.agentNo,
       // Add other fields as needed
     });
+
 
     if (req.files) {
       const nicDocFiles = req.files['nicDoc'];
@@ -78,20 +112,12 @@ const createCustomer = asyncHandler(async (req, res) => {
 
     res.status(201).json(customer);
   } catch (error) {
-    // Check if the error is due to duplicate key violation (email or phone already registered)
-    if (error.code === 11000 || error.code === 11001) {
-      let errorMessage = "";
-      if (error.keyPattern.email) {
-        errorMessage = "Email is already registered";
-      } else if (error.keyPattern.phone) {
-        errorMessage = "Phone number is already registered";
-      }
-      return res.status(400).json({ message: errorMessage });
-    }
-    console.error("Error creating package:", error);
+    // Handle other errors
+    console.error("Error creating customer:", error);
     res.status(500).json({ message: "Server error" });
   }
 });
+
 
 
 

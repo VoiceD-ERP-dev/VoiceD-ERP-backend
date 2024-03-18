@@ -22,6 +22,10 @@ const userSchema = mongoose.Schema({
         type: String,
         required : [true, "please add the admin password"],
     },
+    agentNo : {
+        type : String,
+        required: [true, "Please add the admin agentNo"],
+    },
     role: {
         type: String,
         required : [true, "please add the Role"],
