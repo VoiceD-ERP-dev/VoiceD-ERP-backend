@@ -11,3 +11,17 @@ Q
 !controllers/customerController.js,b\8\b88d30c920af1bc05bfb189e4c443a25fa7291cf
 G
 models/salesmanModel.js,4\2\42f73791e23fa54dd8745e741247549ac7e9bb0d
+E
+routes/adminRoutes.js,5\4\54844b71e9fb996c9c03adf3dfc6f02785a8cb70
+N
+controllers/adminController.js,6\6\6692c8a75253931f35cd022fbaef3bbba354765c
+D
+models/adminModel.js,7\d\7dd3a5a6f6e84dc009c7a175f39de47c00207de0
+M
+controllers/userController.js,e\c\ec44b050defa6855748d2a8d6ff06d33bc8bba3a
+9
+	server.js,d\c\dc60ea9ee1ff6246bf342463277d5b914db2883d
+Q
+!controllers/salesmanController.js,b\b\bb07feac4066b7d691b8b80ce889a858972a0651
+H
+routes/salesmanRoutes.js,3\0\3086fb243dbc4f443252dd1107396d7e992081c6

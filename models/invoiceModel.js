@@ -52,6 +52,10 @@ const invoiceSchema = mongoose.Schema({
     required: [true, "Please add the admin agentNo"],
     //unique : [true, "Agent number is already taken"]
   },
+  packagename: {
+    type: String,
+    required: true
+  },
   customerNo: {
     type: String,
   },

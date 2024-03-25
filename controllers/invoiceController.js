@@ -2,6 +2,7 @@ const mongoose = require("mongoose");
 const asyncHandler = require("express-async-handler")
 const  Customer = require("../models/customerModel");
 const Invoice = require("../models/invoiceModel");
+const User = require("../models/userModel");
 const Salesman = require("../models/salesmanModel");
 const sendRejectMail = require('../config/rejectMailSender');
 const Package = require("../models/packageModel");
@@ -33,7 +34,8 @@ const createInvoice = asyncHandler(async(req,res) =>{
       registerId: req.user.registerId, 
       agentNo,
       customerNo,
-      customerName
+      customerName,
+      packagename: package
     });
   
     const newPackage = await Package.create({
@@ -156,13 +158,15 @@ const updateStatus = async (req, res) => {
 
   // Extract required fields from the customer object
   const { _id,firstname, lastname, salesman,salesmanID } = customer;
-
-  const sales = await Salesman.findById(salesmanID);
+  console.log(customer.salesmanID);
+  const sales = await User.find({ registerId: salesmanID });
+  console.log
   const{email} = sales;
   // Log the extracted data
   console.log('Customer Data:', { firstname, lastname, salesman, email });
   
-  if(status=="Rejected"){
+
+  if(status==="Rejected"){
     try {
       // Generate reasonNo (assuming it's the length of the existing rejectReason array + 1)
       const reasonNo = invoice.rejectReason.length + 1;
@@ -246,6 +250,7 @@ const updateStatus = async (req, res) => {
       customer.orders.push(order._id);
       await customer.save();
 
+      
       invoice.order = order._id;
       invoice.status = status;
       await invoice.save();

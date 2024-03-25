@@ -11,7 +11,6 @@ const createsalesman = async (req, res) => {
       if (!firstname || !lastname || !username || !email || !password || !phone  || !agentNo) {
           return res.status(400).json({ message: "All fields are mandatory" });
       }
-
       // Hashing the password
       const hashedPassword = await bcrypt.hash(password, 10);
 

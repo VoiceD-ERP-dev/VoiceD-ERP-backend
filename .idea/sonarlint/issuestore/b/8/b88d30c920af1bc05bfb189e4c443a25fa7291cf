@@ -1,0 +1,6 @@
+
+vjavascript:S3776!"TRefactor this function to reduce its Cognitive Complexity from 28 to the 15 allowed.(šØ„58Ï†úŒæ1
+Zjavascript:S1481""8Remove the declaration of the unused 'invoice' variable.(ð¾‰48Ó†úŒæ1
+Wjavascript:S1854""5Remove this useless assignment to variable "invoice".(ð¾‰48Ô†úŒæ1
+Rjavascript:S1862F"/This condition is covered by the one on line 67(þ®ä¢8Ô†úŒæ1
+8javascript:S108F"Empty block statement.(þ®ä¢8ï†úŒæ1
