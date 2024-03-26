@@ -7,10 +7,9 @@ const config = {
     secure: true,
     auth: {
         user: "dasuntheekshana12@gmail.com",
-        pass: "yszs kvfj dbjq jfqo"
+        pass: "vkid tjfr uanj olpx"
     },
 };
-
 const transporter = nodemailer.createTransport(config);
 
 const sendMailSales = (data) => {

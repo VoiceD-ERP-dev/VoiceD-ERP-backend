@@ -10,12 +10,14 @@ const path = require('path');
 //@desc Get all customers
 //@route GET /api/customers
 //@access private
-const getCustomers = asyncHandler(async (req, res) => {    //async makes a function return a Promise
-  //getting the customers from the db
-  //getting all the customers created by the login in admin
-  const customers = await Customer.find({ salesmanID: req.user.registeredId });  //await makes a function wait for a Promise
-    res.status(200).json(customers);
-  });
+const getCustomers = asyncHandler(async (req, res) => {
+  // Getting the customers from the db
+  // Getting all the customers created by the login in admin
+  console.log(req.user.registerId);
+  const customers = await Customer.find({ salesmanID: req.user.registerId });
+  res.status(200).json(customers);
+});
+
 
 //@desc Get all customers
 //@route GET /api/customers
