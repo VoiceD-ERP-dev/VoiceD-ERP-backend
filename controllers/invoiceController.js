@@ -88,7 +88,7 @@ const createInvoice = asyncHandler(async(req,res) =>{
 //@access private
 const getInvoices = asyncHandler(async (req, res) => {
   // Get all invoices
-  const invoices = await Invoice.find({ registerId: req.user.registeredId });
+  const invoices = await Invoice.find({ registerId: req.user.registerId });
   res.status(200).json(invoices);
 });
 
