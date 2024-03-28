@@ -160,7 +160,6 @@ const updateStatus = async (req, res) => {
   const { _id,firstname, lastname, salesman,salesmanID } = customer;
   console.log(customer.salesmanID);
   const sales = await User.find({ registerId: salesmanID });
-  console.log
   const{email} = sales;
   // Log the extracted data
   console.log('Customer Data:', { firstname, lastname, salesman, email });
